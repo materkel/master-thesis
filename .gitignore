@@ -1,0 +1,7 @@
+old/
+test-system/EventApi/node_modules/
+test-system/JobApi/node_modules/
+test-system/WrapperApi/node_modules/
+test-system-transactional/EventApi/node_modules/
+test-system-transactional/JobApi/node_modules/
+test-system-transactional/WrapperApi/node_modules/
