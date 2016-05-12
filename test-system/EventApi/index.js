@@ -4,7 +4,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const log = require('./logger');
-const Event = require('./Event');
+const Event = require('./models/Event');
 const app = express();
 
 module.exports = app;

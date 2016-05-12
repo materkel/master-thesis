@@ -1,7 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const log = require('./logger');
-const Job = require('./Job');
+const Job = require('./models/Job');
 const app = express();
 
 module.exports = app;

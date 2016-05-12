@@ -1,6 +1,6 @@
 'use strict';
 
-const log = require('./logger');
+const log = require('../logger');
 const kue = require('kue');
 const Queue = require('./Queue');
 
