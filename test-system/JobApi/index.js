@@ -89,3 +89,4 @@ app.delete('/job/:id', (req, res) => {
 });
 
 app.listen(process.env.PORT || process.env.port || 3001);
+log.info(`Job API listening at ${process.env.PORT || process.env.port || 3001}`)
