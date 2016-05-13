@@ -2,8 +2,10 @@
 
 const express = require('express');
 const bodyParser = require('body-parser');
+const request = require('request-promise');
 const log = require('./logger');
 const app = express();
+const port = process.env.PORT || process.env.port || 3002;
 
 module.exports = app;
 
@@ -58,5 +60,5 @@ app.delete('/events/:id', (req, res) => {
   }
 });
 
-app.listen(process.env.PORT || process.env.port || 3002);
-log.info(`Event API listening at ${process.env.PORT || process.env.port || 3002}`)
+app.listen(port);
+log.info(`Wrapper API listening at ${port}`)

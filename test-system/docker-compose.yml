@@ -1,0 +1,42 @@
+event_api:
+    build: ./EventApi
+    links:
+        - mongo:mongo
+    environment:
+      NODE_ENV: "production"
+      DEBUG: "false"
+      port: "3000"
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+job_api:
+    build: ./JobApi
+    links:
+        - redis:redis
+    environment:
+      NODE_ENV: "production"
+      DEBUG: "false"
+      port: "3001"
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+wrapper_api:
+    build: ./WrapperApi
+    links:
+        - event_api:event_api
+        - job_api:job_api
+    environment:
+      NODE_ENV: "production"
+      DEBUG: "false"
+      port: "3002"
+    restart: unless-stopped
+    ports:
+      - "3002:3002"
+redis:
+    image: redis:3.2
+    volumes:
+      - "job_api-redis-volume:/data"
+mongo:
+    image: mongo:3
+    volumes:
+      - "event_api-mongo-volume:/data/db"

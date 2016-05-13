@@ -6,6 +6,7 @@ const bodyParser = require('body-parser');
 const log = require('./logger');
 const Event = require('./models/Event');
 const app = express();
+const port = process.env.PORT || process.env.port || 3000;
 
 module.exports = app;
 
@@ -97,5 +98,5 @@ app.delete('/event/:id', (req, res) => {
   }
 });
 
-app.listen(process.env.PORT || process.env.port || 3000);
-log.info(`Event API listening at ${process.env.PORT || process.env.port || 3000}`)
+app.listen(port);
+log.info(`Event API listening at ${port}`)

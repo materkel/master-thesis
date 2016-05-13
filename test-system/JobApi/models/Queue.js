@@ -1,6 +1,4 @@
 const kue = require('kue');
-// const redis = require('redis');
-// const client = redis.createClient();
 
 /**
  * Create Queue; Setup Redis Connection

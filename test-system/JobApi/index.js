@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const log = require('./logger');
 const Job = require('./models/Job');
 const app = express();
+const port = process.env.PORT || process.env.port || 3001;
 
 module.exports = app;
 
@@ -88,5 +89,5 @@ app.delete('/job/:id', (req, res) => {
   }
 });
 
-app.listen(process.env.PORT || process.env.port || 3001);
-log.info(`Job API listening at ${process.env.PORT || process.env.port || 3001}`)
+app.listen(port);
+log.info(`Job API listening at ${port}`)

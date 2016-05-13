@@ -1,0 +1,15 @@
+event_api:
+    build: .
+    links:
+        - mongo:mongo
+    environment:
+      NODE_ENV: "production"
+      DEBUG: "false"
+      port: "3000"
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+mongo:
+    image: mongo:3
+    volumes:
+      - "event_api-mongo-volume:/data/db"
