@@ -4,6 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "mongo-start": "mongod --dbpath /usr/local/var/mongodb --bind_ip 127.0.0.1 &",
+    "mongo-stop": "mongo admin --eval 'db.shutdownServer();'",
+    "test": "npm run mongo-start && node_modules/.bin/jasmine && npm run mongo-stop",
+    "start-dev": "npm run mongo-start && npm start",
     "start": "node index.js"
   },
   "keywords": [],
