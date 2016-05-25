@@ -29,8 +29,8 @@ if (process.env.NODE_ENV === 'production') {
  */
 app.post('/event', (req, res) => {
   Event.create(req.body)
-    .then(response => {
-      res.json(response);
+    .then(event => {
+      res.json(event);
     })
     .catch(err => {
       log.error(err);
@@ -45,8 +45,8 @@ app.get('/event/:id', (req, res) => {
   const eventId = req.params.id;
   if (eventId !== undefined) {
     Event.read(eventId)
-      .then(response => {
-        res.status(200).json(response);
+      .then(event => {
+        res.status(200).json(event);
       })
       .catch(err => {
         log.error(err);
@@ -65,8 +65,8 @@ app.put('/event/:id', (req, res) => {
   const eventId = req.params.id;
   if (eventId !== undefined) {
     Event.update(eventId, req.body)
-      .then(res => {
-        res.json(res);
+      .then(event => {
+        res.json(event);
       })
       .catch(err => {
         log.error(err);
@@ -85,7 +85,7 @@ app.delete('/event/:id', (req, res) => {
   const eventId = req.params.id;
   if (eventId !== undefined) {
     Event.delete(eventId)
-      .then(response => {
+      .then(event => {
         res.status(200).end();
       })
       .catch(err => {

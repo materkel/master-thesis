@@ -22,15 +22,26 @@ app.use(bodyParser.urlencoded({ extended: true }));
  * REST Endpoint for creating an Event
  */
 app.post('/events', (req, res) => {
-  request
-    .post({ uri: eventApiUrl, json: req.body })
-    .then(event => {
-      res.json(event);
-    })
-    .catch(err => {
-      log.error(err);
-      res.status(400).json(err);
-    });
+  if (req.body) {
+    request
+      .post({ uri: eventApiUrl, json: req.body })
+      .then(event => {
+        log.info('Created Event', event._id);
+        return request.post({ uri: jobApiUrl, json: { eventId: event._id, publishingDate: req.body.publishingDate } })
+      })
+      .then(job => {
+        log.info('Created Job', job);
+        return request.put({ uri: `${eventApiUrl}/${job.eventId}`, json: { jobId: job.id } })
+      })
+      .then(event => {
+        log.info('Updated Event', event);
+        res.json(event))
+      })
+      .catch(err => {
+        log.error(err);
+        res.status(err.status || 500).json(err);
+      });
+  }
 });
 
 /**
@@ -38,8 +49,13 @@ app.post('/events', (req, res) => {
  */
 app.get('/events/:id', (req, res) => {
   const eventId = req.params.id;
-  if (eventId !== undefined) {
-
+  if (eventId) {
+    request({ uri: eventApiUrl })
+      .then(event => res.json(event))
+      .catch(err => {
+        log.error(err);
+        res.status(err.status || 500).json(err);
+      });
   } else {
     var err = new Error('id is not defined');
     res.status(400).json(err);
@@ -51,8 +67,23 @@ app.get('/events/:id', (req, res) => {
  */
 app.put('/events/:id', (req, res) => {
   const eventId = req.params.id;
-  if (eventId !== undefined) {
-
+  if (eventId && req.body) {
+    request
+      .put({ uri: `${eventApiUrl}/${eventId}`, json: req.body })
+      .then(event => {
+        if (req.body.publishingDate) {
+          return request
+            .put({ uri: `${jobApiUrl}/${event.jobId}`, json: { publishingDate: req.body.publishingDate } })
+            .then(job => event);
+        } else {
+          return event;
+        }
+      })
+      .then(event => res.json(event))
+      .catch(err => {
+        log.error(err);
+        res.status(err.status || 500).json(err);
+      });
   } else {
     const err = new Error('id is not defined');
     res.status(400).json(err);
@@ -65,7 +96,14 @@ app.put('/events/:id', (req, res) => {
 app.delete('/events/:id', (req, res) => {
   const eventId = req.params.id;
   if (eventId !== undefined) {
-
+    request
+      .del({ uri: `${eventApiUrl}/${eventId}` })
+      .then(event => request.del({ uri: `${jobApiUrl}/${event.jobId}` }))
+      .then(job => res.status(200))
+      .catch(err => {
+        log.error(err);
+        res.status(err.status || 500).json(err);
+      });
   } else {
     var err = new Error('id is not defined');
     res.status(400).json(err);

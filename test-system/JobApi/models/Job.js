@@ -21,11 +21,13 @@ module.exports = {
         })
         .delay(delay)
         .removeOnComplete(true)
-        .ttl(3000)
+        .ttl(10000)
+        .attempts(5)
+        .backoff({ delay: 10 * 1000, type: 'fixed' })
         .save(err => {
           if (!err) {
             log.debug(`Kue Job created with id ${job.id} and delay ${delay}`);
-            resolve({id: job.id, publishingDate: publishingDate, delay: delay});
+            resolve({id: job.id, eventId, publishingDate, delay });
           } else {
             reject(err);
           }

@@ -14,11 +14,29 @@ describe('A Event', () => {
       .send({ publishingDate })
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
-      .expect(200, err => {
-        if (err !== null) {
-          done.fail();
+      .expect(200)
+      .end(function(err, res) {
+        if (!err && res) {
+          expect(res.body).toBeDefined();
+          expect(res.body._id).toBeDefined();
+          expect(new Date(res.body.publishingDate)).toEqual(publishingDate);
+          done();
         }
-        done();
+        done.fail(err);
       });
   });
+
+  // it('should be created successfully', done => {
+  //   supertest(app)
+  //     .post('/events')
+  //     .send({ publishingDate })
+  //     .set('Accept', 'application/json')
+  //     .expect('Content-Type', /json/)
+  //     .expect(200, err => {
+  //       if (err !== null) {
+  //         done.fail();
+  //       }
+  //       done();
+  //     });
+  // });
 });

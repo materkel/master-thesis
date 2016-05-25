@@ -5,6 +5,10 @@ const Event = mongoose.model('Event', {
   publishingDate: {
     type: Date,
     required: true
+  },
+  jobId: {
+    type: Number,
+    required: false
   }
 });
 

@@ -10,7 +10,7 @@ let id = null;
 describe('A Job', () => {
   it('should be created successfully', done => {
     Job
-      .create({ id: eventId, publishingDate })
+      .create({ eventId, publishingDate })
       .then(res => {
         expect(res).toBeDefined();
         expect(res.publishingDate).toEqual(publishingDate);
