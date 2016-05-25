@@ -46,7 +46,7 @@ app.get('/event/:id', (req, res) => {
   if (eventId !== undefined) {
     Event.read(eventId)
       .then(event => {
-        res.status(200).json(event);
+        res.json(event);
       })
       .catch(err => {
         log.error(err);
@@ -86,7 +86,7 @@ app.delete('/event/:id', (req, res) => {
   if (eventId !== undefined) {
     Event.delete(eventId)
       .then(event => {
-        res.status(200).end();
+        res.json(event);
       })
       .catch(err => {
         log.error(err);

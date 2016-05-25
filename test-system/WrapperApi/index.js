@@ -50,8 +50,11 @@ app.post('/events', (req, res) => {
 app.get('/events/:id', (req, res) => {
   const eventId = req.params.id;
   if (eventId) {
-    request({ uri: eventApiUrl })
-      .then(event => res.json(event))
+    request.get({ uri: `${eventApiUrl}/${eventId}` })
+      .then(event => {
+        log.debug('Read Event', event);
+        res.json(JSON.parse(event));
+      })
       .catch(err => {
         log.error(err);
         res.status(err.status || 500).json(err);
@@ -98,8 +101,14 @@ app.delete('/events/:id', (req, res) => {
   if (eventId !== undefined) {
     request
       .del({ uri: `${eventApiUrl}/${eventId}` })
-      .then(event => request.del({ uri: `${jobApiUrl}/${event.jobId}` }))
-      .then(job => res.status(200))
+      .then(event => {
+        log.info('Deleted Event', event);
+        return request.del({ uri: `${jobApiUrl}/${JSON.parse(event).jobId}` })
+      })
+      .then(() => {
+        log.info('Deleted Job for Event', eventId);
+        res.status(200).end();
+      })
       .catch(err => {
         log.error(err);
         res.status(err.status || 500).json(err);

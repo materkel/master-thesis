@@ -49,6 +49,30 @@ describe('A Event', () => {
         done(err);
       });
   });
+
+  it('should be read successfully', done => {
+    supertest(app)
+      .get(`/events/${eventId}`)
+      .set('Accept', 'application/json')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end((err, res) => {
+        if (!err && res) {
+          expect(res.body).to.exist;
+          expect(res.body._id).to.exist;
+          expect(res.body.publishingDate).to.exist;
+          expect(res.body.jobId).to.exist;
+          expect(new Date(res.body.publishingDate)).to.equalDate(publishingDate2);
+        }
+        done(err);
+      });
+  });
+
+  it('should be deleted successfully', done => {
+    supertest(app)
+      .del(`/events/${eventId}`)
+      .expect(200, done);
+  });
 });
 
 
