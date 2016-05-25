@@ -1,5 +1,9 @@
 'use strict';
 
+const chai = require('chai');
+const expect = chai.expect;
+chai.use(require('chai-datetime'));
+
 const Event = require('../index').models.Event;
 const publishingDate = new Date();
 const publishingDate2 = new Date(publishingDate);
@@ -11,46 +15,46 @@ describe('An Event', () => {
     Event
       .create({ publishingDate })
       .then(res => {
-        expect(res).toBeDefined();
-        expect(res.publishingDate).toEqual(publishingDate);
-        expect(res._id).toBeDefined();
+        expect(res).to.exist;
+        expect(res.publishingDate).to.equalDate(publishingDate);
+        expect(res._id).to.exist;
         id = res.id;
         done();
       })
-      .catch(err => done.fail(err));
+      .catch(err => done(err));
   });
 
   it('should be read successfully', done => {
     Event
       .read(id)
       .then(res => {
-        expect(res).toBeDefined();
-        expect(res.id).toEqual(id);
-        expect(res.publishingDate).toEqual(publishingDate);
+        expect(res).to.exist;
+        expect(res.id).to.equal(id);
+        expect(res.publishingDate).to.equalDate(publishingDate);
         done();
       })
-      .catch(err => done.fail(err));
+      .catch(err => done(err));
   });
 
   it('should be updated successfully', done => {
     Event
       .update(id, { publishingDate: publishingDate2 })
       .then(res => {
-        expect(res).toBeDefined();
-        expect(res.id).toEqual(id);
-        expect(res.publishingDate).toEqual(publishingDate2);
+        expect(res).to.exist;
+        expect(res.id).to.equal(id);
+        expect(res.publishingDate).to.equalDate(publishingDate2);
         done();
       })
-      .catch(err => done.fail(err));
+      .catch(err => done(err));
   });
 
   it('should be deleted successfully', done => {
     Event
       .delete(id)
       .then(res => {
-        expect(res).toBeDefined();
+        expect(res).to.exist;
         done();
       })
-      .catch(err => done.fail(err));
+      .catch(err => done(err));
   });
 });

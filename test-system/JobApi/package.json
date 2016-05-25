@@ -6,7 +6,7 @@
   "scripts": {
     "redis-start": "redis-server > /dev/null 2>&1 &",
     "redis-stop": "redis-cli SHUTDOWN > /dev/null 2>&1 &",
-    "test": "npm run redis-start && node_modules/.bin/jasmine && npm run redis-stop",
+    "test": "npm run redis-start && node_modules/.bin/mocha && npm run redis-stop",
     "start-dev": "npm run redis-start && npm start",
     "start": "node index.js"
   },
@@ -21,6 +21,8 @@
     "kue": "0.10.4"
   },
   "devDependencies": {
-    "jasmine": "^2.4.1"
+    "chai": "^3.5.0",
+    "chai-datetime": "^1.4.1",
+    "mocha": "^2.5.3"
   }
 }

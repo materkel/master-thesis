@@ -19,8 +19,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
  */
 app.post('/job', (req, res) => {
   Job.create(req.body)
-    .then(response => {
-      res.json(response);
+    .then(job => {
+      res.json(job);
     })
     .catch(err => {
       log.error(err);
@@ -35,8 +35,8 @@ app.get('/job/:id', (req, res) => {
   const jobId = req.params.id;
   if (jobId !== undefined) {
     Job.read(jobId)
-      .then(response => {
-        res.status(200).json(response);
+      .then(job => {
+        res.status(200).json(job);
       })
       .catch(err => {
         log.error(err);
@@ -55,8 +55,8 @@ app.put('/job/:id', (req, res) => {
   const jobId = req.params.id;
   if (jobId !== undefined) {
     Job.update(jobId, req.body)
-      .then(res => {
-        res.json(res);
+      .then(job => {
+        res.json(job);
       })
       .catch(err => {
         log.error(err);
@@ -76,7 +76,7 @@ app.delete('/job/:id', (req, res) => {
   const jobId = req.params.id;
   if (jobId !== undefined) {
     Job.delete(jobId)
-      .then(response => {
+      .then(job => {
         res.status(200).end();
       })
       .catch(err => {

@@ -26,16 +26,16 @@ app.post('/events', (req, res) => {
     request
       .post({ uri: eventApiUrl, json: req.body })
       .then(event => {
-        log.info('Created Event', event._id);
+        log.debug('Created Event', event._id);
         return request.post({ uri: jobApiUrl, json: { eventId: event._id, publishingDate: req.body.publishingDate } })
       })
       .then(job => {
-        log.info('Created Job', job);
+        log.debug('Created Job', job);
         return request.put({ uri: `${eventApiUrl}/${job.eventId}`, json: { jobId: job.id } })
       })
       .then(event => {
-        log.info('Updated Event', event);
-        res.json(event))
+        log.debug('Updated Event', event);
+        res.json(event);
       })
       .catch(err => {
         log.error(err);
@@ -76,7 +76,7 @@ app.put('/events/:id', (req, res) => {
             .put({ uri: `${jobApiUrl}/${event.jobId}`, json: { publishingDate: req.body.publishingDate } })
             .then(job => event);
         } else {
-          return event;
+          return Promise.resolve(event);
         }
       })
       .then(event => res.json(event))

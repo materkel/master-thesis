@@ -6,7 +6,7 @@
   "scripts": {
     "mongo-start": "mongod --dbpath /usr/local/var/mongodb --bind_ip 127.0.0.1 &",
     "mongo-stop": "mongo admin --eval 'db.shutdownServer();'",
-    "test": "npm run mongo-start && node_modules/.bin/jasmine && npm run mongo-stop",
+    "test": "npm run mongo-start && node_modules/.bin/mocha && npm run mongo-stop",
     "start-dev": "npm run mongo-start && npm start",
     "start": "node index.js"
   },
@@ -21,6 +21,8 @@
     "mongoose": "^4.4.16"
   },
   "devDependencies": {
-    "jasmine": "^2.4.1"
+    "chai": "^3.5.0",
+    "chai-datetime": "^1.4.1",
+    "mocha": "^2.5.3"
   }
 }
