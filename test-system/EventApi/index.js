@@ -5,12 +5,15 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const log = require('./logger');
 const Event = require('./models/Event');
+const apiMonkey = require('api-monkey');
 const app = express();
 const port = process.env.PORT || process.env.port || 3000;
 
 module.exports = app;
 
 app.models = { Event };
+
+app.use(apiMonkey());
 
 // For parsing application/json
 app.use(bodyParser.json());

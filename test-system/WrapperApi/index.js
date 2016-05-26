@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const request = require('request-promise');
 const log = require('./logger');
 const app = express();
+const apiMonkey = require('api-monkey');
 const port = process.env.PORT || process.env.port || 3002;
 
 const nodeEnv = process.env.NODE_ENV;
@@ -12,6 +13,8 @@ const eventApiUrl = nodeEnv === 'production' ? 'event_api' : 'http://localhost:3
 const jobApiUrl = nodeEnv === 'production' ? 'job_api' : 'http://localhost:3001/job';
 
 module.exports = app;
+
+app.use(apiMonkey());
 
 // For parsing application/json
 app.use(bodyParser.json());
