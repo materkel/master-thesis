@@ -137,9 +137,9 @@ module.exports = {
    */
   count: () => {
     return new Promise((resolve, reject) => {
-      client.dbsize((err, count) => {
+      client.keys('q:job:[0-9]*', (err, keys) => {
         if (!err) {
-          resolve(count);
+          resolve(keys.length);
         }
         reject(err);
       });

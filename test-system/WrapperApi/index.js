@@ -50,7 +50,7 @@ app.post('/events', (req, res) => {
         res.json(event);
       })
       .catch(err => {
-        log.error(err);
+        log.debug(err);
         res.status(err.status || 500).json(err);
       });
   } else {
@@ -70,7 +70,7 @@ app.get('/events/:id', (req, res) => {
         res.json(JSON.parse(event));
       })
       .catch(err => {
-        log.error(err);
+        log.debug(err);
         res.status(err.status || 500).json(err);
       });
   } else {
@@ -102,7 +102,7 @@ app.put('/events/:id', (req, res) => {
       })
       .then(event => res.json(event))
       .catch(err => {
-        log.error(err);
+        log.debug(err);
         res.status(err.status || 500).json(err);
       });
   } else {
@@ -132,7 +132,7 @@ app.delete('/events/:id', (req, res) => {
         res.status(200).end();
       })
       .catch(err => {
-        log.error(err);
+        log.debug(err);
         res.status(err.status || 500).json(err);
       });
   } else {

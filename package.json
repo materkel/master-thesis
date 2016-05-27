@@ -1,0 +1,30 @@
+{
+  "name": "master-thesis",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mfressdorf/master-thesis.git"
+  },
+  "keywords": [],
+  "author": "Matthias Freßdorf <mfressdorf@gmail.com> (http://mfressdorf.de)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mfressdorf/master-thesis/issues"
+  },
+  "homepage": "https://github.com/mfressdorf/master-thesis#readme",
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "chai-datetime": "^1.4.1",
+    "mocha": "^2.5.3",
+    "request-promise": "^3.0.0",
+    "supertest": "^1.2.0"
+  }
+}

@@ -26,7 +26,7 @@ app.post('/job', (req, res) => {
       res.json(job);
     })
     .catch(err => {
-      log.error(err);
+      log.debug(err);
       res.status(400).json(err);
     });
 });
@@ -42,7 +42,7 @@ app.get('/job/:id', (req, res) => {
         res.status(200).json(job);
       })
       .catch(err => {
-        log.error(err);
+        log.debug(err);
         res.status(400).json(err);
       });
   } else {
@@ -62,7 +62,7 @@ app.put('/job/:id', (req, res) => {
         res.json(job);
       })
       .catch(err => {
-        log.error(err);
+        log.debug(err);
         res.status(400).json(err);
       });
   } else {
@@ -83,7 +83,7 @@ app.delete('/job/:id', (req, res) => {
         res.status(200).end();
       })
       .catch(err => {
-        log.error(err);
+        log.debug(err);
         res.status(400).json(err);
       });
   } else {

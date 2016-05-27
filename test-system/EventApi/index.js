@@ -28,7 +28,7 @@ app.post('/event', (req, res) => {
       res.json(event);
     })
     .catch(err => {
-      log.error(err);
+      log.debug(err);
       res.status(500).json(err);
     });
 });
@@ -44,7 +44,7 @@ app.get('/event/:id', (req, res) => {
         res.json(event);
       })
       .catch(err => {
-        log.error(err);
+        log.debug(err);
         res.status(500).json(err);
       });
   } else {
@@ -64,7 +64,7 @@ app.put('/event/:id', (req, res) => {
         res.json(event);
       })
       .catch(err => {
-        log.error(err);
+        log.debug(err);
         res.status(500).json(err);
       });
   } else {
@@ -84,7 +84,7 @@ app.delete('/event/:id', (req, res) => {
         res.json(event);
       })
       .catch(err => {
-        log.error(err);
+        log.debug(err);
         res.status(500).json(err);
       });
   } else {
