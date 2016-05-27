@@ -4,7 +4,7 @@ const chai = require('chai');
 const expect = chai.expect;
 chai.use(require('chai-datetime'));
 
-const Event = require('../index').models.Event;
+const Event = require('../models/Event');
 const publishingDate = new Date();
 const publishingDate2 = new Date(publishingDate);
 publishingDate2.setDate(publishingDate2.getDate() + 30);

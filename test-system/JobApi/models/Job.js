@@ -4,6 +4,12 @@ const log = require('../logger');
 const kue = require('kue');
 const Queue = require('./Queue');
 
+const redis = require('redis');
+const client = redis.createClient({
+  host: process.env.NODE_ENV === 'production' ? 'redis' : 'localhost',
+  port: 6379
+});
+
 module.exports = {
   /**
    * Create Job
@@ -116,6 +122,41 @@ module.exports = {
       } catch(e) {
         reject(e);
       }
+    });
+  },
+
+  /**
+   * Get all Jobs
+   */
+  findAll: () => {
+    // todo
+  },
+
+  /**
+   * Count all Jobs
+   */
+  count: () => {
+    return new Promise((resolve, reject) => {
+      client.dbsize((err, count) => {
+        if (!err) {
+          resolve(count);
+        }
+        reject(err);
+      });
+    });
+  },
+
+  /**
+   * Delete all Jobs
+   */
+  deleteAll: () => {
+    return new Promise((resolve, reject) => {
+      client.flushdb((err, res) => {
+        if (!err) {
+          resolve(res);
+        }
+        reject(err);
+      });
     });
   }
 }

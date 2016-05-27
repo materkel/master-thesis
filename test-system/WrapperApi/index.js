@@ -26,7 +26,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
  */
 app.post('/events', (req, res) => {
   if (req.body) {
-    log.info(req.monkeyHeaders);
     request.post({ uri: eventApiUrl, json: req.body, headers: req.monkeyHeaders })
       .then(event => {
         log.debug('Created Event', event._id);

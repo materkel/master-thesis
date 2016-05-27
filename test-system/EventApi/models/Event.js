@@ -1,7 +1,8 @@
 'use strict';
 
-const mongoose = require('mongoose');
-const Event = mongoose.model('Event', {
+const db = require('./MongoDB');
+
+const Event = db.model('Event', {
   publishingDate: {
     type: Date,
     required: true
@@ -29,23 +30,44 @@ module.exports = {
   },
 
   /**
-   * Read Job
+   * Read Event
    */
   read: id => {
     return Event.findById(id);
   },
 
   /**
-   * Update Job
+   * Update Evebt
    */
   update: (id, data) => {
     return Event.findByIdAndUpdate(id, data, { 'new': true });
   },
 
   /**
-   * Delete Job
+   * Delete Event
    */
   delete: id => {
     return Event.findByIdAndRemove(id);
+  },
+
+  /**
+   * Count Events
+   */
+  count: () => {
+    return Event.count();
+  },
+
+  /**
+   * Delete all Events
+   */
+  deleteAll: () => {
+    return Event.remove();
+  },
+
+  /**
+   * Read all Events
+   */
+  findAll: () => {
+    return Event.find();
   }
 }

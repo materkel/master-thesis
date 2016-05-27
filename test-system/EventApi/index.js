@@ -1,7 +1,6 @@
 'use strict';
 
 const express = require('express');
-const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const log = require('./logger');
 const Event = require('./models/Event');
@@ -20,13 +19,6 @@ app.use(bodyParser.json());
 // For parsing application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Connect to MongoDB
-if (process.env.NODE_ENV === 'production') {
-  mongoose.connect('mongodb://mongo:27017/EventApi');
-} else {
-  mongoose.connect('mongodb://localhost/EventApi');
-}
-
 /**
  * REST Endpoint for creating an Event
  */
@@ -37,7 +29,7 @@ app.post('/event', (req, res) => {
     })
     .catch(err => {
       log.error(err);
-      res.status(400).json(err);
+      res.status(500).json(err);
     });
 });
 
@@ -53,7 +45,7 @@ app.get('/event/:id', (req, res) => {
       })
       .catch(err => {
         log.error(err);
-        res.status(400).json(err);
+        res.status(500).json(err);
       });
   } else {
     var err = new Error('id is not defined');
@@ -73,7 +65,7 @@ app.put('/event/:id', (req, res) => {
       })
       .catch(err => {
         log.error(err);
-        res.status(400).json(err);
+        res.status(500).json(err);
       });
   } else {
     const err = new Error('id is not defined');
@@ -93,7 +85,7 @@ app.delete('/event/:id', (req, res) => {
       })
       .catch(err => {
         log.error(err);
-        res.status(400).json(err);
+        res.status(500).json(err);
       });
   } else {
     var err = new Error('id is not defined');
