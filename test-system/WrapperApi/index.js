@@ -26,15 +26,24 @@ app.use(bodyParser.urlencoded({ extended: true }));
  */
 app.post('/events', (req, res) => {
   if (req.body) {
-    request
-      .post({ uri: eventApiUrl, json: req.body })
+    request.post({ uri: eventApiUrl, json: req.body, headers: req.monkeyHeaders })
       .then(event => {
         log.debug('Created Event', event._id);
-        return request.post({ uri: jobApiUrl, json: { eventId: event._id, publishingDate: req.body.publishingDate } })
+        return request
+          .post({
+            uri: jobApiUrl,
+            json: { eventId: event._id, publishingDate: req.body.publishingDate },
+            headers: req.monkeyHeaders
+          });
       })
       .then(job => {
         log.debug('Created Job', job);
-        return request.put({ uri: `${eventApiUrl}/${job.eventId}`, json: { jobId: job.id } })
+        return request
+          .put({
+            uri: `${eventApiUrl}/${job.eventId}`,
+            json: { jobId: job.id },
+            headers: req.monkeyHeaders
+          })
       })
       .then(event => {
         log.debug('Updated Event', event);
@@ -53,7 +62,7 @@ app.post('/events', (req, res) => {
 app.get('/events/:id', (req, res) => {
   const eventId = req.params.id;
   if (eventId) {
-    request.get({ uri: `${eventApiUrl}/${eventId}` })
+    request.get({ uri: `${eventApiUrl}/${eventId}`, headers: req.monkeyHeaders })
       .then(event => {
         log.debug('Read Event', event);
         res.json(JSON.parse(event));
@@ -75,11 +84,15 @@ app.put('/events/:id', (req, res) => {
   const eventId = req.params.id;
   if (eventId && req.body) {
     request
-      .put({ uri: `${eventApiUrl}/${eventId}`, json: req.body })
+      .put({ uri: `${eventApiUrl}/${eventId}`, json: req.body, headers: req.monkeyHeaders })
       .then(event => {
         if (req.body.publishingDate) {
           return request
-            .put({ uri: `${jobApiUrl}/${event.jobId}`, json: { publishingDate: req.body.publishingDate } })
+            .put({
+              uri: `${jobApiUrl}/${event.jobId}`,
+              json: { publishingDate: req.body.publishingDate },
+              headers: req.monkeyHeaders
+            })
             .then(job => event);
         } else {
           return Promise.resolve(event);
@@ -105,11 +118,15 @@ app.delete('/events/:id', (req, res) => {
     request
       .del({ uri: `${eventApiUrl}/${eventId}` })
       .then(event => {
-        log.info('Deleted Event', event);
-        return request.del({ uri: `${jobApiUrl}/${JSON.parse(event).jobId}` })
+        log.debug('Deleted Event', event);
+        return request
+          .del({
+            uri: `${jobApiUrl}/${JSON.parse(event).jobId}`,
+            headers: req.monkeyHeaders
+          });
       })
       .then(() => {
-        log.info('Deleted Job for Event', eventId);
+        log.debug('Deleted Job for Event', eventId);
         res.status(200).end();
       })
       .catch(err => {
