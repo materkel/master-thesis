@@ -14,7 +14,7 @@
   "author": "Matthias Freßdorf <mfressdorf@gmail.com> (http://mfressdorf.de)",
   "license": "ISC",
   "dependencies": {
-    "api-monkey": "^0.2.0",
+    "api-monkey": "^0.2.1",
     "body-parser": "^1.15.1",
     "bunyan": "^1.8.1",
     "bunyan-prettystream": "^0.1.3",
