@@ -13,7 +13,9 @@ const Job = require('../test-system/JobApi/models/Job');
 
 const publishingDate = new Date();
 const publishingDate2 = new Date(publishingDate);
+const publishingDate3 = new Date(publishingDate);
 publishingDate2.setDate(publishingDate2.getDate() + 5);
+publishingDate3.setDate(publishingDate3.getDate() + 10);
 
 function clearUpDatabases(done) {
   let promises = [];
@@ -360,6 +362,94 @@ describe('Run Specs for the non transactional system', () => {
           .read(jobId)
           .then(res => {
             expect(new Date(res.publishingDate)).to.equalDate(publishingDate);
+            done();
+          })
+          .catch(err => {
+            done(err);
+          });
+      });
+    });
+
+    /**
+     * 2 requests from user interactions produce a "lost update"
+     * request a -> Update Event
+     * request b -> Update Event
+     * request b -> Update Job
+     * request a -> Update Job
+     * the updated data from request b gets lost, despite originally starting later
+     * Event and Job data are corrupted (not matching anymore)
+     */
+    describe('When issuing 2 contradicting Event PUT request (one part of the request is too slow)', () => {
+      let eventId = null;
+      let jobId = null;
+      before('Clear up databases', (done) => clearUpDatabases(done));
+      before('Create an Event', (done) => {
+        supertest(nonTransactionalApp)
+          .post('/events')
+          .send({ publishingDate })
+          .expect(200)
+          .end((err, res) => {
+            if (!err && res) {
+              eventId = res.body._id;
+              jobId = res.body.jobId
+            }
+            done(err);
+          });
+      });
+      it('the request should succeed', done => {
+        function requestA() {
+          return new Promise((resolve, reject) => {
+            supertest(nonTransactionalApp)
+              .put(`/events/${eventId}`)
+              .send({ publishingDate: publishingDate2 })
+              .set('monkey_PUT_job', '500/none')
+              .expect(200)
+              .end((err, res) => {
+                if (!err && res) {
+                  resolve();
+                }
+                reject(err);
+              });
+          });
+        }
+        function requestB() {
+          return new Promise((resolve, reject) => {
+            supertest(nonTransactionalApp)
+              .put(`/events/${eventId}`)
+              .send({ publishingDate: publishingDate3 })
+              .expect(200)
+              .end((err, res) => {
+                if (!err && res) {
+                  resolve();
+                }
+                reject(err);
+              });
+          });
+        }
+        let promises = [];
+        promises.push(requestA());
+        promises.push(requestB());
+        Promise
+          .all(promises)
+          .then(res => done())
+          .catch(err => done(err));
+      });
+      it('the Event in MongoDB should contain data from Request B', done => {
+        Event
+          .read(eventId)
+          .then(res => {
+            expect(new Date(res.publishingDate)).to.equalDate(publishingDate3);
+            done();
+          })
+          .catch(err => {
+            done(err);
+          });
+      });
+      it('The Job in Redis should contain data from Request A', done => {
+        Job
+          .read(jobId)
+          .then(res => {
+            expect(new Date(res.publishingDate)).to.equalDate(publishingDate2);
             done();
           })
           .catch(err => {
