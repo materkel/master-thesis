@@ -80,7 +80,7 @@ module.exports = {
           if (err || job === undefined) {
             reject(err);
           }
-          job.publishingDate = publishingDate;
+          job.data.publishingDate = publishingDate;
           job
             .delay(delay)
             .save(err => {
