@@ -6,6 +6,8 @@ const apiMonkey = require('api-monkey');
 const app = express();
 const port = process.env.PORT || process.env.port || 3001;
 
+process.title = process.argv[2];
+
 module.exports = app;
 
 app.models = { Job };

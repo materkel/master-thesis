@@ -7,7 +7,11 @@
     "test": "test"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node_modules/.bin/mocha",
+    "post-install": "npm run install-wrapperApi && npm run install-jobApi && npm run install-eventApi",
+    "install-wrapperApi": "cd test-system/WrapperApi && npm install && cd ../../",
+    "install-jobApi": "cd test-system/JobApi && npm install && cd ../../",
+    "install-eventApi": "cd test-system/EventApi && npm install && cd ../../"
   },
   "repository": {
     "type": "git",

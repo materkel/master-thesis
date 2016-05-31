@@ -8,6 +8,8 @@ const apiMonkey = require('api-monkey');
 const app = express();
 const port = process.env.PORT || process.env.port || 3000;
 
+process.title = process.argv[2];
+
 module.exports = app;
 
 app.models = { Event };

@@ -12,6 +12,8 @@ const nodeEnv = process.env.NODE_ENV;
 const eventApiUrl = nodeEnv === 'production' ? 'event_api' : 'http://localhost:3000/event';
 const jobApiUrl = nodeEnv === 'production' ? 'job_api' : 'http://localhost:3001/job';
 
+process.title = process.argv[2];
+
 module.exports = app;
 
 app.use(apiMonkey());
@@ -88,6 +90,7 @@ app.put('/events/:id', (req, res) => {
     request
       .put({ uri: `${eventApiUrl}/${eventId}`, json: req.body, headers: req.monkeyHeaders })
       .then(event => {
+        // Only update the Job if a publishingDate is present in the original request
         if (req.body.publishingDate) {
           return request
             .put({
