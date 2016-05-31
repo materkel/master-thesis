@@ -28,7 +28,7 @@ function clearUpDatabases(done) {
 
 describe('Run Specs for the non transactional system', () => {
 
-  // Simulate a common POST Request to the Wrapper Api of the non transactional system
+  // Simulate common POST Requests to the Wrapper Api of the non transactional system
   describe('Run POST requests', () => {
     /**
      * All 3 steps of the Operation should pass
@@ -36,7 +36,7 @@ describe('Run Specs for the non transactional system', () => {
      * (SUCCESS) 2: Create Job based on eventId
      * (SUCCESS) 3: Update Event with jobId
      */
-    describe('A Event POST request', () => {
+    describe('An Event POST request', () => {
       before('Clear up databases', (done) => clearUpDatabases(done));
       it('should be successful', done => {
         supertest(nonTransactionalApp)
@@ -86,7 +86,7 @@ describe('Run Specs for the non transactional system', () => {
      * (FAIL) 2: Create Job based on eventId
      * (FAIL) 3: Update Event with jobId
      */
-    describe('A Event POST request (Event API fails on create)', () => {
+    describe('An Event POST request (Event API fails on create)', () => {
       before('Clear up databases', (done) => clearUpDatabases(done));
       it('should fail', done => {
         supertest(nonTransactionalApp)
@@ -125,7 +125,7 @@ describe('Run Specs for the non transactional system', () => {
      * (FAIL) 2: Create Job based on eventId
      * (FAIL) 3: Update Event with jobId
      */
-    describe('A Event POST request (Job API fails)', () => {
+    describe('An Event POST request (Job API fails)', () => {
       before('Clear up databases', (done) => clearUpDatabases(done));
       it('should fail', done => {
         supertest(nonTransactionalApp)
@@ -165,7 +165,7 @@ describe('Run Specs for the non transactional system', () => {
      * (SUCCESS) 2: Create Job based on eventId
      * (FAIL) 3: Update Event with jobId
      */
-    describe('A Event POST request (Event API fails on Update Operation)', () => {
+    describe('An Event POST request (Event API fails on Update Operation)', () => {
       before('Clear up databases', (done) => clearUpDatabases(done));
       it('should fail', done => {
         supertest(nonTransactionalApp)
@@ -199,14 +199,14 @@ describe('Run Specs for the non transactional system', () => {
     });
   });
 
-  // Simulate a common PUT Request to the Wrapper Api of the non transactional system
+  // Simulate common PUT Requests to the Wrapper Api of the non transactional system
   describe('Run PUT requests', () => {
     /**
      * All 2 steps of the Operation should pass
      * (SUCCESS) 1: Update Event
      * (SUCCESS) 2: Update Job based on eventId
      */
-    describe('A Event PUT request', () => {
+    describe('An Event PUT request', () => {
       let eventId = null;
       let jobId = null;
       before('Clear up databases', (done) => clearUpDatabases(done));
@@ -269,7 +269,7 @@ describe('Run Specs for the non transactional system', () => {
      * (FAIL) 1: Update Event
      * (FAIL) 2: Update Job based on eventId
      */
-    describe('A Event PUT request (Event API fails on Update Operation)', () => {
+    describe('An Event PUT request (Event API fails on Update Operation)', () => {
       let eventId = null;
       let jobId = null;
       before('Clear up databases', (done) => clearUpDatabases(done));
@@ -322,7 +322,7 @@ describe('Run Specs for the non transactional system', () => {
      * (SUCCESS) 1: Update Event
      * (FAIL) 2: Update Job based on eventId
      */
-    describe('A Event PUT request (Job API fails on Update Operation)', () => {
+    describe('An Event PUT request (Job API fails on Update Operation)', () => {
       let eventId = null;
       let jobId = null;
       before('Clear up databases', (done) => clearUpDatabases(done));
@@ -402,7 +402,7 @@ describe('Run Specs for the non transactional system', () => {
             supertest(nonTransactionalApp)
               .put(`/events/${eventId}`)
               .send({ publishingDate: publishingDate2 })
-              .set('monkey_PUT_job', '500/none')
+              .set('monkey_PUT_job', '750/none')
               .expect(200)
               .end((err, res) => {
                 if (!err && res) {
@@ -458,5 +458,60 @@ describe('Run Specs for the non transactional system', () => {
       });
     });
   });
-})
+
+  // Simulate common DELETE Requests to the Wrapper Api of the non transactional system
+  describe('Run DELETE requests', () => {
+    /**
+     * All 2 steps of the Operation should pass
+     * (SUCCESS) 1: Update Event
+     * (SUCCESS) 2: Update Job based on eventId
+     */
+    describe('An Event DELETE request', () => {
+      let eventId = null;
+      let jobId = null;
+      before('Clear up databases', (done) => clearUpDatabases(done));
+      before('Create an Event', (done) => {
+        supertest(nonTransactionalApp)
+          .post('/events')
+          .send({ publishingDate })
+          .expect(200)
+          .end((err, res) => {
+            if (!err && res) {
+              eventId = res.body._id;
+              jobId = res.body.jobId
+            }
+            done(err);
+          });
+      });
+      it('should be successful', done => {
+        supertest(nonTransactionalApp)
+          .delete(`/events/${eventId}`)
+          .send({ publishingDate: publishingDate2 })
+          .expect(200, done)
+      });
+      it('should have deleted the Event in MongoDB', done => {
+        Event
+          .count()
+          .then(res => {
+            expect(res).to.be.equal(0);
+            done();
+          })
+          .catch(err => {
+            done(err);
+          });
+      });
+      it('should have deleted the Job in Redis', done => {
+        Job
+          .count()
+          .then(res => {
+            expect(res).to.be.equal(0);
+            done();
+          })
+          .catch(err => {
+            done(err);
+          });
+      });
+    });
+  });
+});
 
