@@ -417,6 +417,7 @@ describe('Run Specs for the non transactional system', () => {
             supertest(nonTransactionalApp)
               .put(`/events/${eventId}`)
               .send({ publishingDate: publishingDate3 })
+              .set('monkey_PUT_event', '10/none')
               .expect(200)
               .end((err, res) => {
                 if (!err && res) {
@@ -463,8 +464,8 @@ describe('Run Specs for the non transactional system', () => {
   describe('Run DELETE requests', () => {
     /**
      * All 2 steps of the Operation should pass
-     * (SUCCESS) 1: Update Event
-     * (SUCCESS) 2: Update Job based on eventId
+     * (SUCCESS) 1: Delete Event
+     * (SUCCESS) 2: Delete Job based on eventId
      */
     describe('An Event DELETE request', () => {
       let eventId = null;
@@ -505,6 +506,59 @@ describe('Run Specs for the non transactional system', () => {
           .count()
           .then(res => {
             expect(res).to.be.equal(0);
+            done();
+          })
+          .catch(err => {
+            done(err);
+          });
+      });
+    });
+
+    /**
+     * The Job Api should throw an Error, the Job delete operation fails
+     * (SUCCESS) 1: Delete Event
+     * (FAIL) 2: Delete Job based on eventId
+     */
+    describe('An Event DELETE request', () => {
+      let eventId = null;
+      let jobId = null;
+      before('Clear up databases', (done) => clearUpDatabases(done));
+      before('Create an Event', (done) => {
+        supertest(nonTransactionalApp)
+          .post('/events')
+          .send({ publishingDate })
+          .expect(200)
+          .end((err, res) => {
+            if (!err && res) {
+              eventId = res.body._id;
+              jobId = res.body.jobId
+            }
+            done(err);
+          });
+      });
+      it('should fail', done => {
+        supertest(nonTransactionalApp)
+          .delete(`/events/${eventId}`)
+          .send({ publishingDate: publishingDate2 })
+          .set('monkey_DELETE_job', 'none/500')
+          .expect(500, done)
+      });
+      it('should have deleted the Event in MongoDB', done => {
+        Event
+          .count()
+          .then(res => {
+            expect(res).to.be.equal(0);
+            done();
+          })
+          .catch(err => {
+            done(err);
+          });
+      });
+      it('should not have deleted the Job in Redis', done => {
+        Job
+          .count()
+          .then(res => {
+            expect(res).to.be.equal(1);
             done();
           })
           .catch(err => {
