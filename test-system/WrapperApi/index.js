@@ -121,7 +121,7 @@ app.delete('/events/:id', (req, res) => {
   const eventId = req.params.id;
   if (eventId !== undefined) {
     request
-      .del({ uri: `${eventApiUrl}/${eventId}` })
+      .del({ uri: `${eventApiUrl}/${eventId}`, headers: req.monkeyHeaders })
       .then(event => {
         log.debug('Deleted Event', event);
         return request
