@@ -4,3 +4,6 @@
 [submodule "modules/compensation-request"]
 	path = modules/compensation-request
 	url = https://github.com/mfressdorf/compensation-request
+[submodule "modules/api-monkey"]
+	path = modules/api-monkey
+	url = https://github.com/mfressdorf/api-monkey
