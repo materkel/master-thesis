@@ -1,3 +1,6 @@
 [submodule "modules/compensation-js"]
 	path = modules/compensation-js
 	url = https://github.com/mfressdorf/compensation-js
+[submodule "modules/compensation-request"]
+	path = modules/compensation-request
+	url = https://github.com/mfressdorf/compensation-request
