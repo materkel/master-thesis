@@ -8,10 +8,10 @@
     "stop-eventApi": "cd ../EventApi && npm run stop && cd ../WrapperApi",
     "start-jobApi": "cd ../JobApi && npm run start-dev && cd ../WrapperApi",
     "stop-jobApi": "cd ../JobApi && npm run stop && cd ../WrapperApi",
-    "start-services": "npm run start-eventApi && npm run start-jobApi",
+    "start-services": "npm run start-eventApi & npm run start-jobApi",
     "stop-services": "npm run stop-eventApi && npm run stop-jobApi",
     "test": "node_modules/.bin/mocha",
-    "start-dev": "npm run start-services && npm start",
+    "start-dev": "npm run start-services & npm start",
     "stop-dev": "npm run stop-services && npm run stop",
     "start": "node index.js WrapperApi",
     "stop": "pkill --signal SIGINT WrapperApi"
