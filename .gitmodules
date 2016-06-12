@@ -7,3 +7,6 @@
 [submodule "modules/api-monkey"]
 	path = modules/api-monkey
 	url = https://github.com/mfressdorf/api-monkey
+[submodule "modules/transaction-utility-amqp"]
+	path = modules/transaction-utility-amqp
+	url = https://github.com/mfressdorf/transaction-utility-amqp
