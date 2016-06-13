@@ -1,0 +1,38 @@
+{
+  "name": "WrapperApi",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start-eventApi": "cd ../EventApi && npm run start-dev && cd ../WrapperApi",
+    "stop-eventApi": "cd ../EventApi && npm run stop && cd ../WrapperApi",
+    "start-jobApi": "cd ../JobApi && npm run start-dev && cd ../WrapperApi",
+    "stop-jobApi": "cd ../JobApi && npm run stop && cd ../WrapperApi",
+    "start-services": "npm run start-rabbitmq && npm run start-jobApi & sleep 3; npm run start-eventApi",
+    "stop-services": "npm run stop-rabbitmq && npm run stop-eventApi && npm run stop-jobApi",
+    "start-rabbitmq": "rabbitmq-server -detached &",
+    "stop-rabbitmq": "sudo rabbitmqctl stop &",
+    "test": "node_modules/.bin/mocha",
+    "start-dev": "npm run start-services & npm start",
+    "stop-dev": "npm run stop-services && npm run stop",
+    "start": "node index.js WrapperApiTransactional",
+    "stop": "pkill WrapperApiTransactional"
+  },
+  "keywords": [],
+  "author": "Matthias Freßdorf <mfressdorf@gmail.com> (http://mfressdorf.de)",
+  "license": "ISC",
+  "dependencies": {
+    "api-monkey": "^0.2.1",
+    "body-parser": "^1.15.1",
+    "bunyan": "^1.8.1",
+    "bunyan-prettystream": "^0.1.3",
+    "express": "^4.13.4",
+    "request-promise": "^3.0.0"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "chai-datetime": "^1.4.1",
+    "mocha": "^2.5.3",
+    "supertest": "^1.2.0"
+  }
+}
