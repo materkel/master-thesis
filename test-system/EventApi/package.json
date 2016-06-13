@@ -8,8 +8,8 @@
     "mongo-stop": "mongo admin --eval 'db.shutdownServer();'",
     "test": "npm run mongo-start && node_modules/.bin/mocha && npm run mongo-stop",
     "start-dev": "npm run mongo-start && npm start",
-    "start": "node index.js",
-    "stop": "pkill --signal SIGINT EventApi && npm run mongo-stop"
+    "start": "node index.js EventApi",
+    "stop": "pkill EventApi && npm run mongo-stop"
   },
   "keywords": [],
   "author": "Matthias Freßdorf <mfressdorf@gmail.com> (http://mfressdorf.de)",

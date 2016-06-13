@@ -7,7 +7,15 @@
     "test": "test"
   },
   "scripts": {
+    "start-nontransactional": "cd test-system/WrapperApi && npm run start-services && cd ../../ &",
+    "stop-nontransactional": "cd test-system/WrapperApi && npm run stop-services && cd ../../",
+    "start-transactional": "cd test-system-transactional && npm run start-rabbitmq && npm run start-services && cd ../../ &",
+    "stop-transactional": "cd test-system-transactional && npm run stop-rabbitmq && npm run stop-services && cd ../../",
+    "pretest": "npm run start-nontransactional && npm run start-transactional",
     "test": "node_modules/.bin/mocha",
+    "test-transactional": "npm run start-transactional && sleep 20; node_modules/.bin/mocha test/scenarios-transactional.js",
+    "test-nontransactional": "npm run start-nontransactional && sleep 20; node_modules/.bin/mocha test/scenarios-non-transactional.js",
+    "posttest": "npm run stop-nontransactional && npm run stop-transactional",
     "post-install": "npm run install-wrapperApi && npm run install-jobApi && npm run install-eventApi",
     "install-wrapperApi": "cd test-system/WrapperApi && npm install && cd ../../",
     "install-jobApi": "cd test-system/JobApi && npm install && cd ../../",

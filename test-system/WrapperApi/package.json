@@ -14,7 +14,7 @@
     "start-dev": "npm run start-services & npm start",
     "stop-dev": "npm run stop-services && npm run stop",
     "start": "node index.js WrapperApi",
-    "stop": "pkill --signal SIGINT WrapperApi"
+    "stop": "pkill WrapperApi"
   },
   "keywords": [],
   "author": "Matthias Freßdorf <mfressdorf@gmail.com> (http://mfressdorf.de)",

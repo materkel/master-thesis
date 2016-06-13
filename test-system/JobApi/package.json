@@ -9,7 +9,7 @@
     "test": "npm run redis-start && node_modules/.bin/mocha && npm run redis-stop",
     "start-dev": "npm run redis-start && npm start",
     "start": "node index.js JobApi",
-    "stop": "pkill --signal SIGINT JobApi && npm run redis-stop"
+    "stop": "pkill JobApi && npm run redis-stop"
   },
   "keywords": [],
   "author": "Matthias Freßdorf <mfressdorf@gmail.com> (http://mfressdorf.de)",
