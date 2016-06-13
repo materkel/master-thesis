@@ -40,3 +40,7 @@ mongo:
     image: mongo:3
     volumes:
       - "event_api-mongo-volume:/data/db"
+rabbitmq:
+    image: "rabbitmq:management"
+    ports:
+      - '15672:15672'
