@@ -11,7 +11,7 @@ On mac with Homebrew:
 
 ```js
 brew update
-brew install mongodb redis
+brew install mongodb redis rabbitmq
 ```
 
 Install dependencies
