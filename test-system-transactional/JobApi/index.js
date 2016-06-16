@@ -23,13 +23,12 @@ const compensations = {
   'update': Job.update,
   'delete': Job.delete
 }
-
 const redisOptions = {
   host: process.env.NODE_ENV === 'production' ? 'redis' : 'localhost',
   port: 6379
 }
-
-const compensation = compensationLib(compensations, redisOptions);
+const compensationConfig = { compensations, redisOptions, id: 'JobApi' };
+const compensation = compensationLib(compensationConfig);
 
 // Set up transaction listener for the job API
 transactionUtil.listener('job', msg => {
@@ -68,9 +67,15 @@ app.post('/job', handleTransaction, (req, res) => {
     .create(req.body)
     .then(job => {
       if (req.get('transaction_id')) {
-        compensation.add(req.get('transaction_id'), 'delete', job.id);
+        log.debug('Add compensation');
+        compensation
+          .add(req.get('transaction_id'), 'delete', job.id)
+          .finally(() => {
+            res.json(job);
+          });
+      } else {
+        res.json(job);
       }
-      res.json(job);
     })
     .catch(err => {
       log.debug(err);
@@ -84,7 +89,8 @@ app.post('/job', handleTransaction, (req, res) => {
 app.get('/job/:id', (req, res) => {
   const jobId = req.params.id;
   if (jobId !== undefined) {
-    Job.read(jobId)
+    Job
+      .read(jobId)
       .then(job => {
         res.status(200).json(job);
       })
@@ -109,12 +115,15 @@ app.put('/job/:id', handleTransaction, (req, res) => {
       Job
         .read(jobId)
         .then(origJob => {
-          log.info('Add compensation');
-          compensation.add(req.get('transaction_id'), 'update', jobId, origJob);
           return Job
             .update(jobId, req.body)
             .then(job => {
-              res.json(job);
+              log.debug('Add compensation');
+              compensation
+                .add(req.get('transaction_id'), 'update', jobId, origJob)
+                .finally(() => {
+                  res.json(job);
+                });
             });
         })
         .catch(err => {
@@ -150,12 +159,15 @@ app.delete('/job/:id', handleTransaction, (req, res) => {
       Job
         .read(jobId)
         .then(origJob => {
-          log.info('Add compensation');
-          compensation.add(req.get('transaction_id'), 'create', origJob);
           return Job
             .delete(jobId)
             .then(job => {
-              res.status(200).end();
+              log.debug('Add compensation');
+              compensation
+                .add(req.get('transaction_id'), 'create', origJob)
+                .finally(() => {
+                  res.status(200).end();
+                });
             });
         })
         .catch(err => {

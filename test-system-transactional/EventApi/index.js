@@ -24,13 +24,12 @@ const compensations = {
   'update': Event.update,
   'delete': Event.delete
 }
-
 const redisOptions = {
   host: process.env.NODE_ENV === 'production' ? 'redis' : 'localhost',
   port: 6379
 }
-
-const compensation = compensationLib(compensations, redisOptions);
+const compensationConfig = { compensations, redisOptions, id: 'EventApi', multiple: true };
+const compensation = compensationLib(compensationConfig);
 
 // Set up transaction listeners for the event API
 transactionUtil.listener('event', msg => finishTransaction(msg, 'event'));
@@ -74,9 +73,14 @@ app.post('/event', handleTransaction, (req, res) => {
     .then(event => {
       if (req.get('transaction_id')) {
         log.debug('Add compensation');
-        compensation.add(req.get('transaction_id'), 'delete', event.id);
+        compensation
+          .add(req.get('transaction_id'), 'delete', event.id)
+          .finally(() => {
+            res.json(event);
+          });
+      } else {
+        res.json(event);
       }
-      res.json(event);
     })
     .catch(err => {
       log.debug(err);
@@ -115,12 +119,15 @@ app.put('/event/:id', handleTransaction, (req, res) => {
       Event
         .read(eventId)
         .then(origEvent => {
-          log.debug('Add compensation');
-          compensation.add(req.get('transaction_id'), 'update', eventId, origEvent);
           return Event
             .update(eventId, req.body)
             .then(event => {
-              res.json(event);
+              log.debug('Add compensation');
+              compensation
+                .add(req.get('transaction_id'), 'update', eventId, origEvent)
+                .finally(() => {
+                  res.json(event);
+                });
             });
         })
         .catch(err => {
@@ -155,12 +162,15 @@ app.delete('/event/:id', handleTransaction, (req, res) => {
       Event
         .read(eventId)
         .then(origEvent => {
-          log.debug('Add compensation');
-          compensation.add(req.get('transaction_id'), 'create', origEvent);
           return Event
             .delete(eventId)
             .then(event => {
-              res.json(event);
+              log.debug('Add compensation');
+              compensation
+                .add(req.get('transaction_id'), 'create', origEvent)
+                .finally(() => {
+                  res.json(event);
+                })
             });
         })
         .catch(err => {
