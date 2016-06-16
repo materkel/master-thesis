@@ -65,13 +65,14 @@ app.post('/events', beginTransaction, (req, res) => {
       .then(event => {
         log.debug('Updated Event', event);
         // COMMIT TRANSACTION
-        transactionUtil.commit(req.get('transactionId'));
+        log.debug('Commit transaction');
+        transactionUtil.commit(req.transactionId);
         res.json(event);
       })
       .catch(err => {
         // ROLLBACK TRANSACTION
         log.debug('Rollback transaction');
-        transactionUtil.rollback(req.get('transactionId'));
+        transactionUtil.rollback(req.transactionId);
         log.debug(err);
         res.status(err.status || 500).json(err);
       });
@@ -126,13 +127,13 @@ app.put('/events/:id', beginTransaction, (req, res) => {
       })
       .then(event => {
         // COMMIT TRANSACTION
-        transactionUtil.commit(req.get('transactionId'));
+        transactionUtil.commit(req.transactionId);
         res.json(event)
       })
       .catch(err => {
         // COMMIT TRANSACTION
         log.debug('Rollback transaction');
-        transactionUtil.rollback(req.get('transactionId'));
+        transactionUtil.rollback(req.transactionId);
         log.debug(err);
         res.status(err.status || 500).json(err);
       });
@@ -158,14 +159,14 @@ app.delete('/events/:id', beginTransaction, (req, res) => {
       })
       .then(() => {
         // COMMIT TRANSACTION
-        transactionUtil.commit(req.get('transactionId'));
+        transactionUtil.commit(req.transactionId);
         log.debug('Deleted Job for Event', eventId);
         res.status(200).end();
       })
       .catch(err => {
         // COMMIT TRANSACTION
         log.debug('Rollback transaction');
-        transactionUtil.rollback(req.get('transactionId'));
+        transactionUtil.rollback(req.transactionId);
         log.debug(err);
         res.status(err.status || 500).json(err);
       });

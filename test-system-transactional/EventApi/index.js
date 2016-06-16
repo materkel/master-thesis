@@ -36,13 +36,14 @@ transactionUtil.listener('event', msg => finishTransaction(msg, 'event'));
 
 
 function finishTransaction(msg, listener) {
+  log.debug('Receive end of transaction message');
   let { id, action } = JSON.parse(msg.content.toString());
   if (action === 'r') {
-    log.debug('Run compensating action (rollback transaction)');
-    compensation.run(id, 'event');
+    log.debug(`Run compensating action (rollback transaction) for id ${id}`);
+    compensation.run(id);
   } else {
-    log.debug('Remove compensating action (commit transaction)');
-    compensation.remove(id, 'event');
+    log.debug(`Remove compensating action (commit transaction) for id ${id}`);
+    compensation.remove(id);
   }
 }
 
@@ -73,7 +74,7 @@ app.post('/event', handleTransaction, (req, res) => {
     .then(event => {
       if (req.get('transaction_id')) {
         log.debug('Add compensation');
-        compensation.add(req.get('transaction_id'), 'delete', event.id);
+        compensation.add(req.get('transaction_id'), 'delete', event.id)
       }
       res.json(event);
     })

@@ -35,10 +35,10 @@ transactionUtil.listener('job', msg => {
   let { id, action } = JSON.parse(msg.content.toString());
   if (action === 'r') {
     log.debug('Run compensating action (rollback transaction)');
-    compensation.run(id, 'job');
+    compensation.run(id);
   } else {
     log.debug('Remove compensating action (commit transaction)');
-    compensation.remove(id, 'job');
+    compensation.remove(id);
   }
 });
 
