@@ -1,0 +1,30 @@
+{
+  "name": "EventApi",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "mongo-start": "mongod --dbpath /usr/local/var/mongodb --bind_ip 127.0.0.1 &",
+    "mongo-stop": "mongo admin --eval 'db.shutdownServer();'",
+    "test": "npm run mongo-start && node_modules/.bin/mocha && npm run mongo-stop",
+    "start-dev": "npm run mongo-start && npm start",
+    "start": "node index.js EventApiTransactional",
+    "stop": "pkill EventApiTransactional && npm run mongo-stop"
+  },
+  "keywords": [],
+  "author": "Matthias Freßdorf <mfressdorf@gmail.com> (http://mfressdorf.de)",
+  "license": "ISC",
+  "dependencies": {
+    "api-monkey": "^0.2.1",
+    "body-parser": "^1.15.1",
+    "bunyan": "^1.8.1",
+    "bunyan-prettystream": "^0.1.3",
+    "express": "^4.13.4",
+    "mongoose": "^4.4.16"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "chai-datetime": "^1.4.1",
+    "mocha": "^2.5.3"
+  }
+}
