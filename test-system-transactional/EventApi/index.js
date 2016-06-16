@@ -73,14 +73,9 @@ app.post('/event', handleTransaction, (req, res) => {
     .then(event => {
       if (req.get('transaction_id')) {
         log.debug('Add compensation');
-        compensation
-          .add(req.get('transaction_id'), 'delete', event.id)
-          .finally(() => {
-            res.json(event);
-          });
-      } else {
-        res.json(event);
+        compensation.add(req.get('transaction_id'), 'delete', event.id);
       }
+      res.json(event);
     })
     .catch(err => {
       log.debug(err);
@@ -123,11 +118,8 @@ app.put('/event/:id', handleTransaction, (req, res) => {
             .update(eventId, req.body)
             .then(event => {
               log.debug('Add compensation');
-              compensation
-                .add(req.get('transaction_id'), 'update', eventId, origEvent)
-                .finally(() => {
-                  res.json(event);
-                });
+              compensation.add(req.get('transaction_id'), 'update', eventId, origEvent);
+              res.json(event);
             });
         })
         .catch(err => {
@@ -166,11 +158,8 @@ app.delete('/event/:id', handleTransaction, (req, res) => {
             .delete(eventId)
             .then(event => {
               log.debug('Add compensation');
-              compensation
-                .add(req.get('transaction_id'), 'create', origEvent)
-                .finally(() => {
-                  res.json(event);
-                })
+              compensation.add(req.get('transaction_id'), 'create', origEvent);
+              res.json(event);
             });
         })
         .catch(err => {

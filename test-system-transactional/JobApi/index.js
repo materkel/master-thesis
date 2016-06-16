@@ -68,14 +68,9 @@ app.post('/job', handleTransaction, (req, res) => {
     .then(job => {
       if (req.get('transaction_id')) {
         log.debug('Add compensation');
-        compensation
-          .add(req.get('transaction_id'), 'delete', job.id)
-          .finally(() => {
-            res.json(job);
-          });
-      } else {
-        res.json(job);
+        compensation.add(req.get('transaction_id'), 'delete', job.id);
       }
+      res.json(job);
     })
     .catch(err => {
       log.debug(err);
@@ -119,11 +114,8 @@ app.put('/job/:id', handleTransaction, (req, res) => {
             .update(jobId, req.body)
             .then(job => {
               log.debug('Add compensation');
-              compensation
-                .add(req.get('transaction_id'), 'update', jobId, origJob)
-                .finally(() => {
-                  res.json(job);
-                });
+              compensation.add(req.get('transaction_id'), 'update', jobId, origJob);
+              res.json(job);
             });
         })
         .catch(err => {
@@ -163,11 +155,8 @@ app.delete('/job/:id', handleTransaction, (req, res) => {
             .delete(jobId)
             .then(job => {
               log.debug('Add compensation');
-              compensation
-                .add(req.get('transaction_id'), 'create', origJob)
-                .finally(() => {
-                  res.status(200).end();
-                });
+              compensation.add(req.get('transaction_id'), 'create', origJob);
+              res.status(200).end();
             });
         })
         .catch(err => {
