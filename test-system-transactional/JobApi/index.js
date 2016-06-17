@@ -32,12 +32,13 @@ const compensation = compensationLib(compensationConfig);
 
 // Set up transaction listener for the job API
 transactionUtil.listener('job', msg => {
+  log.debug(`Receive 'end of transaction' message ${msg.content.toString()}`);
   let { id, action } = JSON.parse(msg.content.toString());
   if (action === 'r') {
-    log.debug('Run compensating action (rollback transaction)');
+    log.debug(`Run compensating action (rollback transaction) for id ${id}`);
     compensation.run(id);
   } else {
-    log.debug('Remove compensating action (commit transaction)');
+    log.debug(`Remove compensating action (commit transaction) for id ${id}`);
     compensation.remove(id);
   }
 });
@@ -46,8 +47,8 @@ transactionUtil.listener('job', msg => {
 function handleTransaction(req, res, next) {
   if (req.get('transaction_id')) {
     log.debug('Handle Transaction');
-    // get transaction id
     const transactionId = req.get('transaction_id');
+    req.transactionId = transactionId;
     // listen for commit/rollback
     transactionUtil.listen('job', transactionId);
   }
@@ -66,9 +67,9 @@ app.post('/job', handleTransaction, (req, res) => {
   Job
     .create(req.body)
     .then(job => {
-      if (req.get('transaction_id')) {
+      if (req.transactionId) {
         log.debug('Add compensation');
-        compensation.add(req.get('transaction_id'), 'delete', job.id);
+        compensation.add(req.transactionId, 'delete', job.id);
       }
       res.json(job);
     })
@@ -105,7 +106,7 @@ app.get('/job/:id', (req, res) => {
 app.put('/job/:id', handleTransaction, (req, res) => {
   const jobId = req.params.id;
   if (jobId !== undefined) {
-    if (req.get('transaction_id')) {
+    if (req.transactionId) {
       // fetch previous version to add its data to the update compensation
       Job
         .read(jobId)
@@ -114,7 +115,7 @@ app.put('/job/:id', handleTransaction, (req, res) => {
             .update(jobId, req.body)
             .then(job => {
               log.debug('Add compensation');
-              compensation.add(req.get('transaction_id'), 'update', jobId, origJob);
+              compensation.add(req.transactionId, 'update', jobId, origJob);
               res.json(job);
             });
         })
@@ -146,7 +147,7 @@ app.put('/job/:id', handleTransaction, (req, res) => {
 app.delete('/job/:id', handleTransaction, (req, res) => {
   const jobId = req.params.id;
   if (jobId !== undefined) {
-    if (req.get('transaction_id')) {
+    if (req.transactionId) {
       // fetch previous version to add its data to the create compensation
       Job
         .read(jobId)
@@ -155,7 +156,7 @@ app.delete('/job/:id', handleTransaction, (req, res) => {
             .delete(jobId)
             .then(job => {
               log.debug('Add compensation');
-              compensation.add(req.get('transaction_id'), 'create', origJob);
+              compensation.add(req.transactionId, 'create', origJob);
               res.status(200).end();
             });
         })

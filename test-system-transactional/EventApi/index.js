@@ -36,7 +36,7 @@ transactionUtil.listener('event', msg => finishTransaction(msg, 'event'));
 
 
 function finishTransaction(msg, listener) {
-  log.debug('Receive end of transaction message');
+  log.debug(`Receive 'end of transaction' message ${msg.content.toString()}`);
   let { id, action } = JSON.parse(msg.content.toString());
   if (action === 'r') {
     log.debug(`Run compensating action (rollback transaction) for id ${id}`);
@@ -47,13 +47,12 @@ function finishTransaction(msg, listener) {
   }
 }
 
-
 // Transaction middleware
 function handleTransaction(req, res, next) {
   if (req.get('transaction_id')) {
     log.debug('Handle Transaction');
-    // get transaction id
     const transactionId = req.get('transaction_id');
+    req.transactionId = transactionId;
     // listen for commit/rollback
     transactionUtil.listen('event', transactionId);
   }
@@ -72,9 +71,9 @@ app.post('/event', handleTransaction, (req, res) => {
   Event
     .create(req.body)
     .then(event => {
-      if (req.get('transaction_id')) {
+      if (req.transactionId) {
         log.debug('Add compensation');
-        compensation.add(req.get('transaction_id'), 'delete', event.id)
+        compensation.add(req.transactionId, 'delete', event.id)
       }
       res.json(event);
     })
@@ -110,7 +109,7 @@ app.get('/event/:id', (req, res) => {
 app.put('/event/:id', handleTransaction, (req, res) => {
   const eventId = req.params.id;
   if (eventId !== undefined) {
-    if (req.get('transaction_id')) {
+    if (req.transactionId) {
       // fetch previous version to add its data to the update compensation
       Event
         .read(eventId)
@@ -119,7 +118,7 @@ app.put('/event/:id', handleTransaction, (req, res) => {
             .update(eventId, req.body)
             .then(event => {
               log.debug('Add compensation');
-              compensation.add(req.get('transaction_id'), 'update', eventId, origEvent);
+              compensation.add(req.transactionId, 'update', eventId, origEvent);
               res.json(event);
             });
         })
@@ -150,7 +149,7 @@ app.put('/event/:id', handleTransaction, (req, res) => {
 app.delete('/event/:id', handleTransaction, (req, res) => {
   const eventId = req.params.id;
   if (eventId !== undefined) {
-    if (req.get('transaction_id')) {
+    if (req.transactionId) {
       // fetch previous version to add its data to the create compensation
       Event
         .read(eventId)
@@ -159,7 +158,7 @@ app.delete('/event/:id', handleTransaction, (req, res) => {
             .delete(eventId)
             .then(event => {
               log.debug('Add compensation');
-              compensation.add(req.get('transaction_id'), 'create', origEvent);
+              compensation.add(req.transactionId, 'create', origEvent);
               res.json(event);
             });
         })
