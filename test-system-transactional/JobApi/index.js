@@ -33,8 +33,8 @@ const compensation = compensationLib(compensationConfig);
 // Set up transaction listener for the job API
 transactionUtil.listener('job', msg => {
   log.debug(`Receive 'end of transaction' message ${msg.content.toString()}`);
-  let { id, msg } = JSON.parse(msg.content.toString());
-  if (msg === 'r') {
+  let { id, action } = JSON.parse(msg.content.toString());
+  if (action === 'r') {
     log.debug(`Run compensating action (rollback transaction) for id ${id}`);
     compensation.run(id);
   } else {
