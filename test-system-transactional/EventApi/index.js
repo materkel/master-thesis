@@ -37,8 +37,8 @@ transactionUtil.listener('event', msg => finishTransaction(msg, 'event'));
 
 function finishTransaction(msg, listener) {
   log.debug(`Receive 'end of transaction' message ${msg.content.toString()}`);
-  let { id, action } = JSON.parse(msg.content.toString());
-  if (action === 'r') {
+  let { id, msg } = JSON.parse(msg.content.toString());
+  if (msg === 'r') {
     log.debug(`Run compensating action (rollback transaction) for id ${id}`);
     compensation.run(id);
   } else {

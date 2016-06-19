@@ -1,2 +1,2 @@
 FROM node:6.1-onbuild
-EXPOSE 3000
+EXPOSE 3004

@@ -7,7 +7,7 @@
     "redis-start": "redis-server > /dev/null 2>&1 &",
     "redis-stop": "redis-cli SHUTDOWN > /dev/null 2>&1 &",
     "test": "npm run redis-start && node_modules/.bin/mocha && npm run redis-stop",
-    "start-dev": "npm run redis-start && npm run start-rabbitmq && npm start",
+    "start-dev": "npm run redis-start && npm run start-rabbitmq && sleep 5 && npm start",
     "start": "node index.js JobApiTransactional",
     "stop": "pkill JobApiTransactional && npm run redis-stop",
     "start-rabbitmq": "rabbitmq-server -detached &",

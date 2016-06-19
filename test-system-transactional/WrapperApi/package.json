@@ -8,7 +8,7 @@
     "stop-eventApi": "cd ../EventApi && npm run stop && cd ../WrapperApi",
     "start-jobApi": "cd ../JobApi && npm run start-dev && cd ../WrapperApi",
     "stop-jobApi": "cd ../JobApi && npm run stop && cd ../WrapperApi",
-    "start-services": "npm run start-rabbitmq && npm run start-jobApi & sleep 3; npm run start-eventApi",
+    "start-services": "npm run start-rabbitmq && sleep 3 && npm run start-jobApi & sleep 3; npm run start-eventApi",
     "stop-services": "npm run stop-rabbitmq && npm run stop-eventApi && npm run stop-jobApi",
     "start-rabbitmq": "rabbitmq-server -detached &",
     "stop-rabbitmq": "sudo rabbitmqctl stop &",

@@ -8,7 +8,7 @@ event_api:
       port: "3000"
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "3004:3004"
 mongo:
     image: mongo:3
     volumes:

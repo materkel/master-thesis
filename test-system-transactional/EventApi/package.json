@@ -7,7 +7,7 @@
     "mongo-start": "mongod --dbpath /usr/local/var/mongodb --bind_ip 127.0.0.1 &",
     "mongo-stop": "mongo admin --eval 'db.shutdownServer();'",
     "test": "npm run mongo-start && node_modules/.bin/mocha && npm run mongo-stop",
-    "start-dev": "npm run mongo-start && npm run start-rabbitmq && npm start",
+    "start-dev": "npm run mongo-start && npm run start-rabbitmq && sleep 5 && npm start",
     "start": "node index.js EventApiTransactional",
     "stop": "pkill EventApiTransactional && npm run mongo-stop",
     "start-rabbitmq": "rabbitmq-server -detached &",
