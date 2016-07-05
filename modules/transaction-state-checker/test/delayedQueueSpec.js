@@ -1,5 +1,5 @@
 import chai from 'chai';
-import transactionCheckerLib from '../index';
+import delayedQueueLib from '../lib/delayedQueueAmqp';
 import amqp from 'amqplib';
 
 const expect = chai.expect;
@@ -7,7 +7,7 @@ const config = {
   url: 'amqp://guest:guest@localhost:5672',
   ack: true
 };
-const stateChecker = transactionCheckerLib(config);
+const delayedQueue = delayedQueueLib(config);
 
 function cleanUpRabbitMQ(done) {
   amqp
@@ -30,11 +30,11 @@ function cleanUpRabbitMQ(done) {
 
 before(done => cleanUpRabbitMQ(done));
 
-describe('The transaction-state-checker', () => {
+describe('The delayed queue', () => {
 
-  it('should create a transaction-check consumer', done => {
+  it('should create a consumer', done => {
     // Set up consumer
-    stateChecker.consume('transactionCheck1', msg => {})
+    delayedQueue.consume('transactionCheck1', msg => {})
       .then(() => {
         // Check if consumer exists
         amqp
@@ -53,7 +53,7 @@ describe('The transaction-state-checker', () => {
   });
 
   it('should send a delayed message', done => {
-    stateChecker.consume('transactionCheck2', msg => {
+    delayedQueue.consume('transactionCheck2', msg => {
       let parsedMsg = msg.content.toString();
       expect(msg).to.be.defined;
       expect(msg.properties.headers).to.be.defined;
@@ -64,7 +64,7 @@ describe('The transaction-state-checker', () => {
     })
     // listen for transaction outcome on listener 'api2'
     .then(res => {
-      stateChecker.send('transactionCheck2', 'transactionId1', 500);
+      delayedQueue.send('transactionCheck2', 'transactionId1', 500);
     });
   });
 });
