@@ -11,9 +11,11 @@ class transactionChecker {
     };
     this.delayedQueue = delayedQueueLib(delayedQueueConfig)
     this.delayedQueue.consume(transactionName, msg => {
-      // Handle msg & use transaction store
+      // Get information on how many times the check failed before
+      const checkRounds = msg.fields.deliveryTag;
+      // Use the transaction store to get the current state of the transaction
       const transactionId = msg.content.toString();
-      transactionStateStore
+      return transactionStateStore
         .get(transactionId)
         .then(state => {
           if (state === null) {
@@ -25,9 +27,18 @@ class transactionChecker {
               .then(() => transactionUtility.rollback(transactionId))
               .then(() => transactionStateStore.remove(transactionId));
           }
-
-          // Implement repeated checking if pending_commit or pending_rollback is set
-        })
+          // Wait for some retries to handle pending_commit and pending_rollback cases
+          if (checkRounds > 3) {
+            return Promise.resolve(() => {
+              if (state === 'pending_commit') {
+                return transactionUtility.commit(transactionId)
+              }
+              return transactionUtility.rollback(transactionId)
+            })
+            .then(() => transactionStateStore.remove(transactionId));
+          }
+          return Promise.reject('Retry');
+        });
     });
   }
 
