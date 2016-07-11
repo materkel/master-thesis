@@ -16,6 +16,8 @@ if isWriteLocked == 1 then
   return { err = 'There exists a write lock on this resource' }
 end
 
+redis.call('hmset', transactionId, 'type', 'read', 'key', readLock)
+
 local result = redis.call('hset', readLock, transactionId, 'lock')
 
 if ttl ~= 'null' then

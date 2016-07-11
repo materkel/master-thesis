@@ -3,17 +3,16 @@
 --
 -- KEYS[1] - resource key
 -- ARGV[1] - transaction id
-local resource = KEYS[1]
+local lock = KEYS[1]
 local transactionId = ARGV[1]
-local writeLock = resource .. ':lock:write'
 
-local lock = redis.call('get', writeLock)
+local lockId = redis.call('get', lock)
 
-if lock == transactionId then
-  return redis.call('del', writeLock)
+if lockId == transactionId then
+  return redis.call('del', lock)
 end
 
-if not lock then
+if not lockId then
   return 0
 end
 

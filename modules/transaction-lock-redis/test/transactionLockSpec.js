@@ -49,7 +49,7 @@ describe('The lock Manager', () => {
 describe('The lock Manager', () => {
   it('should remove a write lock', done => {
     lockManager.lock('write', 'stories/2/events', 'transaction1')
-      .then(res => lockManager.unlock('write', 'stories/2/events', 'transaction1'))
+      .then(res => lockManager.unlock('transaction1'))
       .then(res => {
         db.exists('stories/2/events:lock:write', (err, res) => {
           if (!err) {
@@ -82,7 +82,7 @@ describe('The lock Manager', () => {
   });
 
   it('should remove a read lock', done => {
-    lockManager.unlock('read', 'stories/2/events', 'transaction3')
+    lockManager.unlock('transaction3')
       .then(res => {
         done();
       });

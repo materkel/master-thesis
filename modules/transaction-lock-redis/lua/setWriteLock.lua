@@ -21,6 +21,8 @@ if isWriteLocked == 1 then
   return { err = 'There already exists a write lock on this resource' }
 end
 
+redis.call('hmset', transactionId, 'type', 'write', 'key', writeLock)
+
 if ttl ~= 'null' then
   return redis.call('set', writeLock, transactionId, 'PX', ttl, 'NX')
 end

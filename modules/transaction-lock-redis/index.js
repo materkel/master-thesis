@@ -77,13 +77,25 @@ module.exports = function () {
     });
   }
 
-  function removeReadLock(resource, transactionId) {
+  function removeReadLock(lock, transactionId) {
     return new Promise(function (resolve, reject) {
-      client.hdel(resource, transactionId, function (err, res) {
+      client.hdel(lock, transactionId, function (err, res) {
         if (!err) {
           resolve(res);
         } else {
           reject(err);
+        }
+      });
+    });
+  }
+
+  function getLockInfo(transactionId) {
+    return new Promise(function (resolve, reject) {
+      client.hgetall(transactionId, function (err, res) {
+        if (!err) {
+          resolve(res);
+        } else {
+          reject();
         }
       });
     });
@@ -113,11 +125,13 @@ module.exports = function () {
     return tryToSet(writeLock, retries, resource, transactionId, ttl);
   }
 
-  function unlock(type, resource, transactionId) {
-    if (type === 'read') {
-      return removeReadLock(resource, transactionId);
-    }
-    return removeWriteLock(resource, transactionId);
+  function unlock(transactionId) {
+    return getLockInfo(transactionId).then(function (res) {
+      if (res.type === 'read') {
+        return removeReadLock(res.key, transactionId);
+      }
+      return removeWriteLock(res.key, transactionId);
+    });
   }
 
   return {

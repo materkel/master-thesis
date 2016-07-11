@@ -61,13 +61,25 @@ module.exports = ({ redisClient = null, redisOptions = {} } = {}) => {
     });
   }
 
-  function removeReadLock(resource, transactionId) {
+  function removeReadLock(lock, transactionId) {
     return new Promise((resolve, reject) => {
-      client.hdel(resource, transactionId, (err, res) => {
+      client.hdel(lock, transactionId, (err, res) => {
         if (!err) {
           resolve(res);
         } else {
           reject(err);
+        }
+      });
+    });
+  }
+
+  function getLockInfo(transactionId) {
+    return new Promise((resolve, reject) => {
+      client.hgetall(transactionId, (err, res) => {
+        if (!err) {
+          resolve(res);
+        } else {
+          reject();
         }
       });
     });
@@ -95,11 +107,14 @@ module.exports = ({ redisClient = null, redisOptions = {} } = {}) => {
     return tryToSet(writeLock, retries, resource, transactionId, ttl)
   }
 
-  function unlock(type, resource, transactionId) {
-    if (type === 'read') {
-      return removeReadLock(resource, transactionId);
-    }
-    return removeWriteLock(resource, transactionId);
+  function unlock(transactionId) {
+    return getLockInfo(transactionId)
+      .then(res => {
+        if (res.type === 'read') {
+          return removeReadLock(res.key, transactionId);
+        }
+        return removeWriteLock(res.key, transactionId);
+      });
   }
 
   return {
