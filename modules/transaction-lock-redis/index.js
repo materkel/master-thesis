@@ -81,6 +81,7 @@ module.exports = function () {
     return new Promise(function (resolve, reject) {
       client.hdel(lock, transactionId, function (err, res) {
         if (!err) {
+          client.del(transactionId);
           resolve(res);
         } else {
           reject(err);

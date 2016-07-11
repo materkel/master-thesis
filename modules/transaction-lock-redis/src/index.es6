@@ -65,6 +65,7 @@ module.exports = ({ redisClient = null, redisOptions = {} } = {}) => {
     return new Promise((resolve, reject) => {
       client.hdel(lock, transactionId, (err, res) => {
         if (!err) {
+          client.del(transactionId);
           resolve(res);
         } else {
           reject(err);

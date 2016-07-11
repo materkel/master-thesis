@@ -9,7 +9,9 @@ local transactionId = ARGV[1]
 local lockId = redis.call('get', lock)
 
 if lockId == transactionId then
-  return redis.call('del', lock)
+  local result = redis.call('del', lock)
+  redis.call('del', transactionId);
+  return result
 end
 
 if not lockId then
