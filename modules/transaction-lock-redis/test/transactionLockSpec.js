@@ -25,21 +25,36 @@ describe('The lock Manager', () => {
 
 describe('The lock Manager', () => {
   it('should aquire a write lock', done => {
-    lockManager.lock('write', 'stories/1/events', 'transaction1')
+    lockManager
+      .lock({
+        type: 'write',
+        path: 'stories/1/events',
+        id: 'transaction1'
+      })
       .then(res => {
         done();
       });
   });
 
   it('should fail when trying aquire a second write lock on the same resource', done => {
-    lockManager.lock('write', 'stories/1/events', 'transaction2')
+    lockManager
+      .lock({
+        type: 'write',
+        path: 'stories/1/events',
+        id: 'transaction2'
+      })
       .catch(err => {
         done();
       });
   });
 
   it('should fail when trying to aquire a read lock on the same resource', done => {
-    lockManager.lock('read', 'stories/1/events', 'transaction3')
+    lockManager
+      .lock({
+        type: 'read',
+        path: 'stories/1/events',
+        id: 'transaction3'
+      })
       .catch(err => {
         done();
       });
@@ -48,7 +63,12 @@ describe('The lock Manager', () => {
 
 describe('The lock Manager', () => {
   it('should remove a write lock', done => {
-    lockManager.lock('write', 'stories/2/events', 'transaction1')
+    lockManager
+      .lock({
+        type: 'write',
+        path: 'stories/2/events',
+        id: 'transaction1'
+      })
       .then(res => lockManager.unlock('transaction1'))
       .then(res => {
         db.exists('stories/2/events:lock:write', (err, res) => {
@@ -61,21 +81,36 @@ describe('The lock Manager', () => {
   });
 
   it('should aquire a read lock', done => {
-    lockManager.lock('read', 'stories/2/events', 'transaction3')
+    lockManager
+      .lock({
+        type: 'read',
+        path: 'stories/2/events',
+        id: 'transaction3'
+      })
       .then(res => {
         done();
       });
   });
 
   it('should fail when trying to aquire a write lock on the same resource', done => {
-    lockManager.lock('write', 'stories/2/events', 'transaction4')
+    lockManager
+      .lock({
+        type: 'write',
+        path: 'stories/2/events',
+        id: 'transaction4'
+      })
       .catch(err => {
         done();
       });
   });
 
   it('should aquire a second read lock', done => {
-    lockManager.lock('read', 'stories/2/events', 'transaction5')
+    lockManager
+      .lock({
+        type: 'read',
+        path: 'stories/2/events',
+        id: 'transaction5'
+      })
       .then(res => {
         done();
       });
