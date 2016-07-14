@@ -131,7 +131,7 @@ module.exports = ({ redisClient = null, redisOptions = {} } = {}) => {
    * @param  {array} parameters - function parameters
    * @return {Promise}
    */
-  function tryLock(fn, retries, ...parameters) {
+  function tryLock(fn, retries, backoff = 0, ...parameters) {
     return Promise.resolve(fn(...parameters))
       .then(res => {
         return Promise.resolve(res);
@@ -139,7 +139,11 @@ module.exports = ({ redisClient = null, redisOptions = {} } = {}) => {
       .catch(err => {
         if (retries) {
           retries -= 1
-          return Promise.resolve(tryToSet(fn, parameters, retries));
+          return new Promise((resolve) => {
+            setTimeout(() => {
+              resolve(tryLock(fn, retries, backoff, ...parameters));
+            }, backoff);
+          });
         } else {
           return Promise.reject(err);
         }
@@ -156,11 +160,11 @@ module.exports = ({ redisClient = null, redisOptions = {} } = {}) => {
    * @param  {number} [config.retries]
    * @return {Promise}
    */
-  function lock({ type, path, id, ttl, retries }) {
+  function lock({ type, path, id, ttl, retries, backoff }) {
     if (type === 'read') {
-      return tryLock(readLock, retries, path, id, ttl)
+      return tryLock(readLock, retries, backoff, path, id, ttl)
     }
-    return tryLock(writeLock, retries, path, id, ttl)
+    return tryLock(writeLock, retries, backoff, path, id, ttl)
   }
 
   /**

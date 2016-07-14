@@ -148,16 +148,22 @@ module.exports = function () {
    * @return {Promise}
    */
   function tryLock(fn, retries) {
-    for (var _len = arguments.length, parameters = Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {
-      parameters[_key - 2] = arguments[_key];
+    for (var _len = arguments.length, parameters = Array(_len > 3 ? _len - 3 : 0), _key = 3; _key < _len; _key++) {
+      parameters[_key - 3] = arguments[_key];
     }
+
+    var backoff = arguments.length <= 2 || arguments[2] === undefined ? 0 : arguments[2];
 
     return Promise.resolve(fn.apply(undefined, parameters)).then(function (res) {
       return Promise.resolve(res);
     }).catch(function (err) {
       if (retries) {
         retries -= 1;
-        return Promise.resolve(tryToSet(fn, parameters, retries));
+        return new Promise(function (resolve) {
+          setTimeout(function () {
+            resolve(tryLock.apply(undefined, [fn, retries, backoff].concat(parameters)));
+          }, backoff);
+        });
       } else {
         return Promise.reject(err);
       }
@@ -180,11 +186,12 @@ module.exports = function () {
     var id = _ref2.id;
     var ttl = _ref2.ttl;
     var retries = _ref2.retries;
+    var backoff = _ref2.backoff;
 
     if (type === 'read') {
-      return tryLock(readLock, retries, path, id, ttl);
+      return tryLock(readLock, retries, backoff, path, id, ttl);
     }
-    return tryLock(writeLock, retries, path, id, ttl);
+    return tryLock(writeLock, retries, backoff, path, id, ttl);
   }
 
   /**
