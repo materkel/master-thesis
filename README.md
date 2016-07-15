@@ -5,6 +5,12 @@ This is the documentation for the code base of my master-thesis project.
 
 ## Setup
 
+Clone this repository (including submodules)
+
+```bash
+git clone --recursive git@github.com:mfressdorf/master-thesis.git
+```
+
 install [mongoDB](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-os-x/), [redis](http://redis.io/download) and [rabbitMQ](https://www.rabbitmq.com/download.html)
 
 On mac with Homebrew:
