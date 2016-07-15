@@ -11,13 +11,17 @@ local readLock = resource .. ':lock:read'
 local writeLock = resource .. ':lock:write'
 
 local isReadLocked = redis.call('exists', readLock)
-local isWriteLocked = redis.call('exists', writeLock)
 
 if isReadLocked == 1 then
   return { err = 'There exists a read lock on this resource' }
 end
 
-if isWriteLocked == 1 then
+local writeLockId = redis.call('get', writeLock)
+
+if writeLockId then
+  if writeLockId == transactionId then
+    return 0
+  end
   return { err = 'There already exists a write lock on this resource' }
 end
 

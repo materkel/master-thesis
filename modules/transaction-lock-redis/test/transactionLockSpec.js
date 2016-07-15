@@ -59,6 +59,18 @@ describe('The lock Manager', () => {
         done();
       });
   });
+
+  it('should succeed in trying to aquire a second write lock on the same resource, if the transactionId matches', done => {
+    lockManager
+      .lock({
+        type: 'write',
+        path: 'stories/1/events',
+        id: 'transaction1'
+      })
+      .then(res => {
+        done();
+      });
+  });
 });
 
 describe('The lock Manager', () => {
