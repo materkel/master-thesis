@@ -22,7 +22,7 @@
     "test-transactional-locking": "node_modules/.bin/mocha test/scenarios-transactional-tx-locking.js",
     "test-all": "node_modules/.bin/mocha",
     "posttest": "npm run stop-nontransactional && npm run stop-transactional",
-    "post-install": "npm run install-nonTransactional && npm run install-transactional",
+    "post-install": "npm run install-nonTransactional && npm run install-transactional && npm run install-modules",
     "install-modules": "npm run install-module-api-monkey && npm run install-module-compensation-js && npm run install-module-compensation-request && npm run install-module-transaction-lock-redis && npm run install-module-transaction-state-checker && npm run install-module-transaction-state-store-redis && npm run install-module-transaction-utility-amqp",
     "install-module-api-monkey": "cd modules/api-monkey && npm install && cd ../../",
     "install-module-compensation-js": "cd modules/compensation-js && npm install && cd ../../",
