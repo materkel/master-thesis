@@ -1,5 +1,7 @@
 'use strict';
 
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
 var _redis = require('redis');
 
 var _redis2 = _interopRequireDefault(_redis);
@@ -144,6 +146,9 @@ module.exports = function () {
    * Try to set a lock
    * @param  {function} fn - lock function which will be tried
    * @param  {number} retries - number of retries
+   * @param  {number|Object } backoff - backoff time or time range in ms
+   * @param  {number} backoff.min - minimal backoff time
+   * @param  {number} backoff.max - maximal backoff time
    * @param  {array} parameters - function parameters
    * @return {Promise}
    */
@@ -158,12 +163,19 @@ module.exports = function () {
       return Promise.resolve(res);
     }).catch(function (err) {
       if (retries) {
-        retries -= 1;
-        return new Promise(function (resolve) {
-          setTimeout(function () {
-            resolve(tryLock.apply(undefined, [fn, retries, backoff].concat(parameters)));
-          }, backoff);
-        });
+        var _ret = function () {
+          retries -= 1;
+          var calculatedBackoff = Number.isInteger(backoff) ? backoff : Math.random() * (backoff.max - backoff.min) + backoff.min;
+          return {
+            v: new Promise(function (resolve) {
+              setTimeout(function () {
+                resolve(tryLock.apply(undefined, [fn, retries, backoff].concat(parameters)));
+              }, calculatedBackoff);
+            })
+          };
+        }();
+
+        if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
       } else {
         return Promise.reject(err);
       }

@@ -128,6 +128,9 @@ module.exports = ({ redisClient = null, redisOptions = {} } = {}) => {
    * Try to set a lock
    * @param  {function} fn - lock function which will be tried
    * @param  {number} retries - number of retries
+   * @param  {number|Object } backoff - backoff time or time range in ms
+   * @param  {number} backoff.min - minimal backoff time
+   * @param  {number} backoff.max - maximal backoff time
    * @param  {array} parameters - function parameters
    * @return {Promise}
    */
@@ -139,10 +142,12 @@ module.exports = ({ redisClient = null, redisOptions = {} } = {}) => {
       .catch(err => {
         if (retries) {
           retries -= 1
+          let calculatedBackoff = Number.isInteger(backoff) ? backoff :
+            Math.random() * (backoff.max - backoff.min) + backoff.min;
           return new Promise((resolve) => {
             setTimeout(() => {
               resolve(tryLock(fn, retries, backoff, ...parameters));
-            }, backoff);
+            }, calculatedBackoff);
           });
         } else {
           return Promise.reject(err);
