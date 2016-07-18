@@ -34,13 +34,29 @@ All modules and services of the independent test systems have individual unit-te
 You can run system integration tests with
 
 ```js
-// This runs both tests for the non-transactional and the transactional system.
+// This starts up and runs all tests for the non-transactional and the transactional system.
 npm test
 
-// Run tests regarding the non transactional system like this.
+// Run tests for the non transactional system
 npm run test-nontransactional
 
-// Run tests regarding the transactional system like this.
+// Run tests for the transactional system
 npm run test-transactional
 
+// Run tests for the transactional system with integrated locking (requires running transactional-system services)
+npm run test-transactional-locking
+```
+
+be sure to start up the relevant systems first (for individual tests - "npm test" starts up all the systems for you).   
+You can either start services idependently (check out the system documentation for the relevant systems in /test-system or /test-system-transactional) or start them up like this:
+
+```js
+// This starts up the test-system
+npm run start-nontransactional
+
+// This starts up the test-system-transactional
+npm run start-transactional
+
+// This starts up both systems
+npm run start-systems
 ```
