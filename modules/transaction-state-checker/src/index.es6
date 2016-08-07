@@ -1,4 +1,4 @@
-import delayedQueueLib from 'lib/delayedQueueAmqp';
+import delayedQueueLib from './lib/delayedQueueAmqp';
 
 class transactionChecker {
   constructor(transactionName, delay, transactionStateStore, transactionUtility) {
@@ -19,7 +19,7 @@ class transactionChecker {
         .get(transactionId)
         .then(state => {
           if (state === null) {
-            return Promise.Resolve();
+            return Promise.resolve();
           }
           if (state === 'pending') {
             return transactionStateStore

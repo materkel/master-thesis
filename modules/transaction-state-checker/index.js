@@ -2,7 +2,7 @@
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _delayedQueueAmqp = require('lib/delayedQueueAmqp');
+var _delayedQueueAmqp = require('./lib/delayedQueueAmqp');
 
 var _delayedQueueAmqp2 = _interopRequireDefault(_delayedQueueAmqp);
 
@@ -28,8 +28,10 @@ var transactionChecker = function () {
       // Use the transaction store to get the current state of the transaction
       var transactionId = msg.content.toString();
       return transactionStateStore.get(transactionId).then(function (state) {
+        console.log('STATE IS ', state);
+        console.log('ROUND', checkRounds);
         if (state === null) {
-          return Promise.Resolve();
+          return Promise.resolve();
         }
         if (state === 'pending') {
           return transactionStateStore.rollback(transactionId).then(function () {
