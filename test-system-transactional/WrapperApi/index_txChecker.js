@@ -14,6 +14,7 @@ const jobApiUrl = nodeEnv === 'production' ? 'job_api' : 'http://localhost:3005/
 
 const TransactionStateChecker = require('../../modules/transaction-state-checker');
 const transactionStateStoreLib = require('../../modules/transaction-state-store-redis');
+const lockManager = require('../../modules/transaction-lock-redis')();
 const transactionUtil = require('../../modules/transaction-utility-amqp')();
 
 const stateStore = transactionStateStoreLib({db: 2});
@@ -22,13 +23,13 @@ const transactionChecker = new TransactionStateChecker('tx_checker', 5000, state
 function commit(tId) {
   stateStore.commit(tId)
     .then(() => transactionUtil.commit(tId))
-    .then(() => {
-      stateStore.remove(tId)
-    });
+    .then(() => lockManager.unlock(tId))
+    .then(() => stateStore.remove(tId));
 }
 function rollback(tId) {
   stateStore.rollback(tId)
     .then(() => transactionUtil.rollback(tId))
+    .then(() => lockManager.unlock(tId))
     .then(() => stateStore.remove(tId));
 }
 process.title = process.argv[2];
@@ -45,11 +46,36 @@ function beginTransaction(req, res, next) {
   req.transactionHeader = { 'transaction_id': transactionId };
   // set transaction id
   req.transactionId = transactionId;
+  next();
+}
 
+function initState(req, res, next) {
   stateStore.add(transactionId).then(res => {
     transactionChecker.check(transactionId);
     next();
   });
+}
+
+function aquireLock(req, res, next) {
+  const type = req.method !== 'GET' ? 'write' : 'read';
+  lockManager
+    .lock({
+      type,
+      path: '/events',
+      id: req.transactionId,
+      ttl: 10000,
+      retries: 500,
+      backoff: {
+        min: 30,
+        max: 100
+      }
+    })
+    .then(success => {
+      next();
+    }
+    .catch(err => {
+      res.status(500).json('Failed to aquire a lock for this resource');
+    });
 }
 
 // For parsing application/json
@@ -60,7 +86,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 /**
  * REST Endpoint for creating an Event
  */
-app.post('/events', beginTransaction, (req, res) => {
+app.post('/events', beginTransaction, initState, aquireLock,(req, res) => {
   if (req.body) {
     let headers = Object.assign(req.monkeyHeaders, req.transactionHeader);
     request
@@ -105,7 +131,7 @@ app.post('/events', beginTransaction, (req, res) => {
 /**
  * REST Endpoint for reading an Event
  */
-app.get('/events/:id', (req, res) => {
+app.get('/events/:id', beginTransaction, aquireLock, (req, res) => {
   const eventId = req.params.id;
   if (eventId) {
     request.get({ uri: `${eventApiUrl}/${eventId}`, headers: req.monkeyHeaders })
@@ -126,7 +152,7 @@ app.get('/events/:id', (req, res) => {
 /**
  * REST Endpoint for updating an Event
  */
-app.put('/events/:id', beginTransaction, (req, res) => {
+app.put('/events/:id', beginTransaction, initState, aquireLock, (req, res) => {
   const eventId = req.params.id;
   if (eventId && req.body) {
     let headers = Object.assign(req.monkeyHeaders, req.transactionHeader);
@@ -168,7 +194,7 @@ app.put('/events/:id', beginTransaction, (req, res) => {
 /**
  * REST Endpoint for deleting an Event
  */
-app.delete('/events/:id', beginTransaction, (req, res) => {
+app.delete('/events/:id', beginTransaction, initState, aquireLock, (req, res) => {
   const eventId = req.params.id;
   if (eventId !== undefined) {
     let headers = Object.assign(req.monkeyHeaders, req.transactionHeader);
