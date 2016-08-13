@@ -18,7 +18,7 @@ const lockManager = require('../../modules/transaction-lock-redis')();
 const transactionUtil = require('../../modules/transaction-utility-amqp')();
 
 const stateStore = transactionStateStoreLib({db: 2});
-const transactionChecker = new TransactionStateChecker('tx_checker', 5000, stateStore, transactionUtil);
+const transactionChecker = new TransactionStateChecker('tx_checker', 5000, stateStore, lockManager, transactionUtil);
 
 function commit(tId) {
   stateStore.commit(tId)

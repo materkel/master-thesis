@@ -6,10 +6,12 @@
   "scripts": {
     "mongo-start": "mongod --dbpath /usr/local/var/mongodb --bind_ip 127.0.0.1 &",
     "mongo-stop": "mongo admin --eval 'db.shutdownServer();'",
+    "redis-start": "redis-server > /dev/null 2>&1 &",
+    "redis-stop": "redis-cli SHUTDOWN > /dev/null 2>&1 &",
     "test": "npm run mongo-start && node_modules/.bin/mocha && npm run mongo-stop",
-    "start-dev": "npm run mongo-start && npm run start-rabbitmq && sleep 5 && npm start",
+    "start-dev": "npm run mongo-start && npm run start-rabbitmq && npm run redis-start && sleep 5 && npm start",
     "start": "node index.js EventApiTransactional",
-    "stop": "pkill EventApiTransactional && npm run mongo-stop",
+    "stop": "pkill EventApiTransactional && npm run mongo-stop && npm run redis-stop && npm run stop-rabbitmq",
     "start-rabbitmq": "rabbitmq-server -detached &",
     "stop-rabbitmq": "sudo rabbitmqctl stop &"
   },

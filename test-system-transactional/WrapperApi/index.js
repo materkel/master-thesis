@@ -60,19 +60,19 @@ app.post('/events', beginTransaction, (req, res) => {
             uri: `${eventApiUrl}/${job.eventId}`,
             json: { jobId: job.id },
             headers
-          })
+          });
       })
       .then(event => {
         log.debug('Updated Event', event);
         // COMMIT TRANSACTION
         log.debug('Commit transaction');
-        transactionUtil.commit(req.transactionId);
+        transactionUtil.commit(req.transactionId)
         res.json(event);
       })
       .catch(err => {
         // ROLLBACK TRANSACTION
         log.debug('Rollback transaction');
-        transactionUtil.rollback(req.transactionId);
+        transactionUtil.rollback(req.transactionId)
         log.debug(err);
         res.status(err.status || 500).json(err);
       });
@@ -131,7 +131,7 @@ app.put('/events/:id', beginTransaction, (req, res) => {
         res.json(event)
       })
       .catch(err => {
-        // COMMIT TRANSACTION
+        // ROLLBACK TRANSACTION
         log.debug('Rollback transaction');
         transactionUtil.rollback(req.transactionId);
         log.debug(err);
@@ -164,7 +164,7 @@ app.delete('/events/:id', beginTransaction, (req, res) => {
         res.status(200).end();
       })
       .catch(err => {
-        // COMMIT TRANSACTION
+        // ROLLBACK TRANSACTION
         log.debug('Rollback transaction');
         transactionUtil.rollback(req.transactionId);
         log.debug(err);
