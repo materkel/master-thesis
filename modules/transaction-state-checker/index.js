@@ -11,7 +11,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var transactionChecker = function () {
-  function transactionChecker(transactionName, delay, transactionStateStore, transactionUtility) {
+  function transactionChecker(transactionName, delay, transactionStateStore, lockManager, transactionUtility) {
     _classCallCheck(this, transactionChecker);
 
     this.transactionName = transactionName;
@@ -28,14 +28,14 @@ var transactionChecker = function () {
       // Use the transaction store to get the current state of the transaction
       var transactionId = msg.content.toString();
       return transactionStateStore.get(transactionId).then(function (state) {
-        console.log('STATE IS ', state);
-        console.log('ROUND', checkRounds);
         if (state === null) {
           return Promise.resolve();
         }
         if (state === 'pending') {
           return transactionStateStore.rollback(transactionId).then(function () {
             return transactionUtility.rollback(transactionId);
+          }).then(function () {
+            return lockManager.unlock(transactionId);
           }).then(function () {
             return transactionStateStore.remove(transactionId);
           });
@@ -47,6 +47,8 @@ var transactionChecker = function () {
               return transactionUtility.commit(transactionId);
             }
             return transactionUtility.rollback(transactionId);
+          }).then(function () {
+            return lockManager.unlock(transactionId);
           }).then(function () {
             return transactionStateStore.remove(transactionId);
           });

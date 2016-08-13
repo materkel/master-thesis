@@ -1,7 +1,7 @@
 import delayedQueueLib from './lib/delayedQueueAmqp';
 
 class transactionChecker {
-  constructor(transactionName, delay, transactionStateStore, transactionUtility) {
+  constructor(transactionName, delay, transactionStateStore, lockManager, transactionUtility) {
     this.transactionName = transactionName;
     this.delay = delay;
 
@@ -25,16 +25,18 @@ class transactionChecker {
             return transactionStateStore
               .rollback(transactionId)
               .then(() => transactionUtility.rollback(transactionId))
+              .then(() => lockManager.unlock(transactionId))
               .then(() => transactionStateStore.remove(transactionId));
           }
           // Wait for some retries to handle pending_commit and pending_rollback cases
           if (checkRounds > 3) {
             return Promise.resolve(() => {
               if (state === 'pending_commit') {
-                return transactionUtility.commit(transactionId)
+                return transactionUtility.commit(transactionId);
               }
-              return transactionUtility.rollback(transactionId)
+              return transactionUtility.rollback(transactionId);
             })
+            .then(() => lockManager.unlock(transactionId))
             .then(() => transactionStateStore.remove(transactionId));
           }
           return Promise.reject('Retry');
