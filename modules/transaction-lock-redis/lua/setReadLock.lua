@@ -21,6 +21,7 @@ redis.call('hmset', transactionId, 'type', 'read', 'key', readLock)
 local result = redis.call('hset', readLock, transactionId, 'lock')
 
 if ttl ~= 'null' then
+  redis.call('pexpire', transactionId, ttl * 2)
   redis.call('pexpire', readLock, ttl)
 end
 
