@@ -27,9 +27,11 @@ end
 
 redis.call('hmset', transactionId, 'type', 'write', 'key', writeLock)
 
+local result = redis.call('set', writeLock, transactionId, 'NX')
+
 if ttl ~= 'null' then
   redis.call('pexpire', transactionId, ttl * 2)
-  return redis.call('set', writeLock, transactionId, 'PX', ttl, 'NX')
+  redis.call('pexpire', writeLock, ttl)
 end
 
-return redis.call('set', writeLock, transactionId, 'NX')
+return result
