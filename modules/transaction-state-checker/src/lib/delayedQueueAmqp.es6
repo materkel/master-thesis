@@ -27,6 +27,7 @@ module.exports = ({ url: url = 'amqp://localhost', exchange: exchange = 'transac
               } else {
                 Promise.resolve(fn(msg))
                   .then(res => ch.ack(msg))
+                  .then(res => ch.close())
                   .catch(err => ch.nack(msg));
               }
             }, { noAck });
@@ -35,12 +36,15 @@ module.exports = ({ url: url = 'amqp://localhost', exchange: exchange = 'transac
   }
 
   function send(transactionCheckQueue, transactionId, delay) {
+    let channel = null;
     return open
       .then(conn => conn.createChannel())
       .then(ch => {
+        channel = ch;
         const headers = { 'x-delay': delay };
-        ch.publish(exchange, transactionCheckQueue, new Buffer(transactionId), { headers });
-      });
+        return ch.publish(exchange, transactionCheckQueue, new Buffer(transactionId), { headers });
+      })
+      .then(res => channel.close());
   }
 
   return {

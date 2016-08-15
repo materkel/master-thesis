@@ -42,6 +42,8 @@ module.exports = function () {
           } else {
             Promise.resolve(fn(msg)).then(function (res) {
               return ch.ack(msg);
+            }).then(function (res) {
+              return ch.close();
             }).catch(function (err) {
               return ch.nack(msg);
             });
@@ -52,11 +54,15 @@ module.exports = function () {
   }
 
   function send(transactionCheckQueue, transactionId, delay) {
+    var channel = null;
     return open.then(function (conn) {
       return conn.createChannel();
     }).then(function (ch) {
+      channel = ch;
       var headers = { 'x-delay': delay };
-      ch.publish(exchange, transactionCheckQueue, new Buffer(transactionId), { headers: headers });
+      return ch.publish(exchange, transactionCheckQueue, new Buffer(transactionId), { headers: headers });
+    }).then(function (res) {
+      return channel.close();
     });
   }
 
