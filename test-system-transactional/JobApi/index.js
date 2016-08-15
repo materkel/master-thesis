@@ -34,13 +34,18 @@ const compensation = compensationLib(compensationConfig);
 transactionUtil.listener('job', msg => {
   log.debug(`Receive 'end of transaction' message ${msg.content.toString()}`);
   let { id, action } = JSON.parse(msg.content.toString());
+  let actionTaken;
   if (action === 'r') {
     log.debug(`Run compensating action (rollback transaction) for id ${id}`);
-    compensation.run(id);
+    actionTaken = compensation.run(id);
   } else {
     log.debug(`Remove compensating action (commit transaction) for id ${id}`);
-    compensation.remove(id);
+    actionTaken = compensation.remove(id);
   }
+  actionTaken.then(res => {
+    log.debug(`Unbind Queue for id ${id}`);
+    transactionUtil.unbind('job', id);
+  });
 });
 
 // Transaction middleware

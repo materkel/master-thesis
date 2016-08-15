@@ -6,7 +6,7 @@ const request = require('request-promise');
 const log = require('./logger');
 const app = express();
 const apiMonkey = require('api-monkey');
-const port = process.env.PORT || process.env.port || 3006;
+const port = process.env.PORT || process.env.port || 3008;
 
 const nodeEnv = process.env.NODE_ENV;
 const eventApiUrl = nodeEnv === 'production' ? 'event_api' : 'http://localhost:3004/event';
@@ -48,7 +48,7 @@ function aquireLock(req, res, next) {
     })
     .then(success => {
       next();
-    }
+    })
     .catch(err => {
       res.status(500).json('Failed to aquire a lock for this resource');
     });
@@ -90,9 +90,7 @@ app.post('/events', beginTransaction, aquireLock, (req, res) => {
         // COMMIT TRANSACTION
         log.debug('Commit transaction');
         transactionUtil.commit(req.transactionId)
-          .then(() => {
-            lockManager.unlock(req.transactionId)
-          });
+          .then(() => lockManager.unlock(req.transactionId));
         res.json(event);
       })
       .catch(err => {
