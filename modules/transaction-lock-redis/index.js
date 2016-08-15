@@ -213,6 +213,9 @@ module.exports = function () {
    */
   function unlock(id) {
     return getLockInfo(id).then(function (res) {
+      if (!res) {
+        return Promise.resolve();
+      }
       if (res.type === 'read') {
         return removeReadLock(res.key, id);
       }

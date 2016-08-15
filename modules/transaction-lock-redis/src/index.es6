@@ -180,6 +180,9 @@ module.exports = ({ redisClient = null, redisOptions = {} } = {}) => {
   function unlock(id) {
     return getLockInfo(id)
       .then(res => {
+        if (!res) {
+          return Promise.resolve();
+        }
         if (res.type === 'read') {
           return removeReadLock(res.key, id);
         }
