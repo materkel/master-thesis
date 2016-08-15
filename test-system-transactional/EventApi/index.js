@@ -26,31 +26,24 @@ const compensations = {
 }
 const redisOptions = {
   host: process.env.NODE_ENV === 'production' ? 'redis' : 'localhost',
-  port: 6379
+  port: 6379,
+  db: 2
 }
 const compensationConfig = { compensations, redisOptions, id: 'EventApi', multiple: true };
 const compensation = compensationLib(compensationConfig);
 
 // Set up transaction listeners for the event API
-transactionUtil.listener('event', msg => finishTransaction(msg, 'event'));
-
-
-function finishTransaction(msg, listener) {
-  log.debug(`Receive 'end of transaction' message ${msg.content.toString()}`);
-  let { id, action } = JSON.parse(msg.content.toString());
-  let actionTaken;
+transactionUtil.listener('event', data => {
+  log.debug(`Receive 'end of transaction' message ${data}`);
+  let { id, action } = data;
   if (action === 'r') {
     log.debug(`Run compensating action (rollback transaction) for id ${id}`);
-    actionTaken = compensation.run(id);
+    return compensation.run(id);
   } else {
     log.debug(`Remove compensating action (commit transaction) for id ${id}`);
-    actionTaken = compensation.remove(id);
+    return compensation.remove(id);
   }
-  actionTaken.then(res => {
-    log.debug(`Unbind Queue for id ${id}`);
-    transactionUtil.unbind('job', id);
-  });
-}
+});
 
 // Transaction middleware
 function handleTransaction(req, res, next) {

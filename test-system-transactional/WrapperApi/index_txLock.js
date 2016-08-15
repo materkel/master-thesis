@@ -12,7 +12,7 @@ const nodeEnv = process.env.NODE_ENV;
 const eventApiUrl = nodeEnv === 'production' ? 'event_api' : 'http://localhost:3004/event';
 const jobApiUrl = nodeEnv === 'production' ? 'job_api' : 'http://localhost:3005/job';
 
-const lockManager = require('../../modules/transaction-lock-redis')();
+const lockManager = require('../../modules/transaction-lock-redis')({db: 4});
 const transactionUtil = require('../../modules/transaction-utility-amqp')();
 
 process.title = process.argv[2];
@@ -90,8 +90,8 @@ app.post('/events', beginTransaction, aquireLock, (req, res) => {
         // COMMIT TRANSACTION
         log.debug('Commit transaction');
         transactionUtil.commit(req.transactionId)
-          .then(() => lockManager.unlock(req.transactionId));
-        res.json(event);
+          .then(() => lockManager.unlock(req.transactionId))
+          .then(() => res.json(event));
       })
       .catch(err => {
         // ROLLBACK TRANSACTION
@@ -114,7 +114,8 @@ app.get('/events/:id', beginTransaction, aquireLock, (req, res) => {
     request.get({ uri: `${eventApiUrl}/${eventId}`, headers: req.monkeyHeaders })
       .then(event => {
         log.debug('Read Event', event);
-        res.json(JSON.parse(event));
+        lockManager.unlock(req.transactionId)
+          .then(() => res.json(JSON.parse(event)));
       })
       .catch(err => {
         log.debug(err);
@@ -152,8 +153,8 @@ app.put('/events/:id', beginTransaction, aquireLock, (req, res) => {
       .then(event => {
         // COMMIT TRANSACTION
         transactionUtil.commit(req.transactionId)
-          .then(() => lockManager.unlock(req.transactionId));
-        res.json(event)
+          .then(() => lockManager.unlock(req.transactionId))
+          .then(() => res.json(event));
       })
       .catch(err => {
         // ROLLBACK TRANSACTION
@@ -186,8 +187,8 @@ app.delete('/events/:id', beginTransaction, aquireLock, (req, res) => {
       .then(() => {
         // COMMIT TRANSACTION
         transactionUtil.commit(req.transactionId)
-          .then(() => lockManager.unlock(req.transactionId));
-        res.status(200).end();
+          .then(() => lockManager.unlock(req.transactionId))
+          .then(() => res.status(200).end());
       })
       .catch(err => {
         // ROLLBACK TRANSACTION

@@ -14,20 +14,20 @@ const jobApiUrl = nodeEnv === 'production' ? 'job_api' : 'http://localhost:3005/
 
 const TransactionStateChecker = require('../../modules/transaction-state-checker');
 const transactionStateStoreLib = require('../../modules/transaction-state-store-redis');
-const lockManager = require('../../modules/transaction-lock-redis')();
+const lockManager = require('../../modules/transaction-lock-redis')({db: 6});
 const transactionUtil = require('../../modules/transaction-utility-amqp')();
 
-const stateStore = transactionStateStoreLib({db: 2});
+const stateStore = transactionStateStoreLib({db: 7});
 const transactionChecker = new TransactionStateChecker('tx_checker', 5000, stateStore, lockManager, transactionUtil);
 
 function commit(tId) {
-  stateStore.commit(tId)
+  return stateStore.commit(tId)
     .then(() => transactionUtil.commit(tId))
     .then(() => lockManager.unlock(tId))
     .then(() => stateStore.remove(tId));
 }
 function rollback(tId) {
-  stateStore.rollback(tId)
+  return stateStore.rollback(tId)
     .then(() => transactionUtil.rollback(tId))
     .then(() => lockManager.unlock(tId))
     .then(() => stateStore.remove(tId));
@@ -50,8 +50,8 @@ function beginTransaction(req, res, next) {
 }
 
 function initState(req, res, next) {
-  stateStore.add(transactionId).then(res => {
-    transactionChecker.check(transactionId);
+  stateStore.add(req.transactionId).then(res => {
+    transactionChecker.check(req.transactionId);
     next();
   });
 }
@@ -113,8 +113,8 @@ app.post('/events', beginTransaction, initState, aquireLock,(req, res) => {
         log.debug('Updated Event', event);
         // COMMIT TRANSACTION
         log.debug('Commit transaction');
-        commit(req.transactionId);
-        res.json(event);
+        commit(req.transactionId)
+          .then(() => res.json(event));
       })
       .catch(err => {
         // ROLLBACK TRANSACTION
@@ -137,7 +137,8 @@ app.get('/events/:id', beginTransaction, aquireLock, (req, res) => {
     request.get({ uri: `${eventApiUrl}/${eventId}`, headers: req.monkeyHeaders })
       .then(event => {
         log.debug('Read Event', event);
-        res.json(JSON.parse(event));
+        lockManager.unlock(req.transactionId)
+          .then(() => res.json(JSON.parse(event)))
       })
       .catch(err => {
         log.debug(err);
@@ -175,8 +176,8 @@ app.put('/events/:id', beginTransaction, initState, aquireLock, (req, res) => {
       .then(event => {
         // COMMIT TRANSACTION
         log.debug('Commit transaction');
-        commit(req.transactionId);
-        res.json(event)
+        commit(req.transactionId)
+          .then(() => res.json(event));
       })
       .catch(err => {
         // COMMIT TRANSACTION
@@ -208,9 +209,11 @@ app.delete('/events/:id', beginTransaction, initState, aquireLock, (req, res) =>
       .then(() => {
         // COMMIT TRANSACTION
         log.debug('Commit transaction');
-        commit(req.transactionId);
-        log.debug('Deleted Job for Event', eventId);
-        res.status(200).end();
+        commit(req.transactionId)
+          .then(() => {
+            log.debug('Deleted Job for Event', eventId);
+            res.status(200).end();
+          });
       })
       .catch(err => {
         // COMMIT TRANSACTION
