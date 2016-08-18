@@ -42,8 +42,6 @@ describe('Run Specs for the non transactional system', () => {
         supertest(nonTransactionalApp)
           .post('/events')
           .send({ publishingDate })
-          .set('Accept', 'application/json')
-          .expect('Content-Type', /json/)
           .expect(200)
           .end((err, res) => {
             if (!err && res) {
@@ -51,8 +49,10 @@ describe('Run Specs for the non transactional system', () => {
               expect(res.body._id).to.exist;
               expect(res.body.jobId).to.exist;
               expect(new Date(res.body.publishingDate)).to.equalDate(publishingDate);
+              done();
+            } else {
+              done(err);
             }
-            done(err);
           });
       });
       it('should have created an Event in MongoDB', done => {
