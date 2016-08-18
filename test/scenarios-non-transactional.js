@@ -379,7 +379,7 @@ describe('Run Specs for the non transactional system', () => {
      * the updated data from request b gets lost, despite originally starting later
      * Event and Job data are corrupted (not matching anymore)
      */
-    describe('When issuing 2 contradicting Event PUT request (one part of the request is too slow)', () => {
+    describe('When issuing 2 conflicting Event PUT request (one part of the request is too slow)', () => {
       let eventId = null;
       let jobId = null;
       before('Clear up databases', (done) => clearUpDatabases(done));

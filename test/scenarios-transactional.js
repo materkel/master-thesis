@@ -26,7 +26,7 @@ function clearUpDatabases(done) {
   });
 }
 
-describe('Run Specs for the non transactional system', () => {
+describe('Run Specs for the transactional system', () => {
 
   // Simulate common POST Requests to the Wrapper Api of the non transactional system
   describe('Run POST requests', () => {
@@ -395,6 +395,94 @@ describe('Run Specs for the non transactional system', () => {
               done(err);
             });
         }, 500);
+      });
+    });
+    /**
+     * 2 requests from user interactions produce a "lost update"
+     * request a -> Update Event
+     * request b -> Update Event
+     * request b -> Update Job
+     * request a -> Update Job
+     * the updated data from request b gets lost, despite originally starting later
+     * Event and Job data are corrupted (not matching anymore)
+     */
+    describe('When issuing 2 conflicting Event PUT request (one part of the request is too slow)', () => {
+      let eventId = null;
+      let jobId = null;
+      before('Clear up databases', (done) => clearUpDatabases(done));
+      before('Create an Event', (done) => {
+        supertest(transactionalApp)
+          .post('/events')
+          .send({ publishingDate })
+          .expect(200)
+          .end((err, res) => {
+            if (!err && res) {
+              eventId = res.body._id;
+              jobId = res.body.jobId
+            }
+            done(err);
+          });
+      });
+      it('the request should succeed', done => {
+        function requestA() {
+          return new Promise((resolve, reject) => {
+            supertest(transactionalApp)
+              .put(`/events/${eventId}`)
+              .send({ publishingDate: publishingDate2 })
+              .set('monkey_PUT_job', '750/none')
+              .expect(200)
+              .end((err, res) => {
+                if (!err && res) {
+                  resolve();
+                }
+                reject(err);
+              });
+          });
+        }
+        function requestB() {
+          return new Promise((resolve, reject) => {
+            supertest(transactionalApp)
+              .put(`/events/${eventId}`)
+              .send({ publishingDate: publishingDate3 })
+              .set('monkey_PUT_event', '10/none')
+              .expect(200)
+              .end((err, res) => {
+                if (!err && res) {
+                  resolve();
+                }
+                reject(err);
+              });
+          });
+        }
+        let promises = [];
+        promises.push(requestA());
+        promises.push(requestB());
+        Promise
+          .all(promises)
+          .then(res => done())
+          .catch(err => done(err));
+      });
+      it('the Event in MongoDB should contain data from Request B', done => {
+        Event
+          .read(eventId)
+          .then(res => {
+            expect(new Date(res.publishingDate)).to.equalDate(publishingDate3);
+            done();
+          })
+          .catch(err => {
+            done(err);
+          });
+      });
+      it('The Job in Redis should contain data from Request A', done => {
+        Job
+          .read(jobId)
+          .then(res => {
+            expect(new Date(res.publishingDate)).to.equalDate(publishingDate2);
+            done();
+          })
+          .catch(err => {
+            done(err);
+          });
       });
     });
   });
