@@ -1,0 +1,79 @@
+[
+  {
+    "n": 10,
+    "time": 377700,
+    "avg": 37770,
+    "success": 10,
+    "successRate": 1
+  },
+  {
+    "n": 50,
+    "time": 985553,
+    "avg": 19711.059999999998,
+    "success": 50,
+    "successRate": 1
+  },
+  {
+    "n": 100,
+    "time": 1998895.5,
+    "avg": 19988.955,
+    "success": 100,
+    "successRate": 1
+  },
+  {
+    "n": 150,
+    "time": 2971531,
+    "avg": 19810.206666666665,
+    "success": 150,
+    "successRate": 1
+  },
+  {
+    "n": 200,
+    "time": 4795021,
+    "avg": 23975.105,
+    "success": 200,
+    "successRate": 1
+  },
+  {
+    "n": 250,
+    "time": 5227696.5,
+    "avg": 20910.786,
+    "success": 250,
+    "successRate": 1
+  },
+  {
+    "n": 300,
+    "time": 7449297,
+    "avg": 24830.989999999998,
+    "success": 300,
+    "successRate": 1
+  },
+  {
+    "n": 350,
+    "time": 7682545.5,
+    "avg": 21950.129999999997,
+    "success": 350,
+    "successRate": 1
+  },
+  {
+    "n": 400,
+    "time": 13059798,
+    "avg": 32649.495,
+    "success": 400,
+    "successRate": 1
+  },
+  {
+    "n": 450,
+    "time": 10425825,
+    "avg": 23168.5,
+    "success": 450,
+    "successRate": 1
+  },
+  {
+    "n": 500,
+    "time": 13307443,
+    "avg": 26614.886,
+    "success": 500,
+    "successRate": 1
+  }
+]
