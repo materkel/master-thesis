@@ -1,4 +1,5 @@
-const sceleton = require('./sceleton-concurrent');
+const sceleton_async = require('./sceleton-concurrent');
+const sceleton_sync = require('./sceleton-sync');
 const jsonfile = require('jsonfile');
 // non transactional Models
 const Event_nontx = require('../test-system/EventApi/models/Event');
@@ -8,8 +9,8 @@ const Event_tx = require('../test-system-transactional/EventApi/models/Event');
 const Job_tx = require('../test-system-transactional/JobApi/models/Job');
 // transactional Wrappers
 const app_nonTx = require('../test-system/WrapperApi/index');
-//const app_tx_cfs = require('../test-system-transactional/WrapperApi/index');
-//const app_tx_locking = require('../test-system-transactional/WrapperApi/index_txLock');
+const app_tx_cfs = require('../test-system-transactional/WrapperApi/index');
+const app_tx_locking = require('../test-system-transactional/WrapperApi/index_txLock');
 const app_tx_checker = require('../test-system-transactional/WrapperApi/index_txChecker');
 
 
@@ -40,7 +41,7 @@ function saveResults(data, name) {
 
 function runSpecs(type, times, name, results) {
   function run(type, num) {
-    return sceleton(type, `${name}_${num}`);
+    return sceleton_sync(type, `${name}_${num}`);
   }
   if (times > 0) {
     return run(type, times)
@@ -71,21 +72,20 @@ function runSpecs(type, times, name, results) {
       }
       return x;
     });
-    saveResults()
     return Promise.resolve(merged);
   }
 }
 
-//clearUpTxDatabases();
-runSpecs(app_tx_checker, 1, 'tx_checker', [])
-  .then(res => saveResults(res, 'tx_checker'));
+// Number of Testruns
+let testruns = 1;
 
-// sceleton(app_transactional_locking)
-//   .then(() => {
-//     console.log('finished running performance tests for the transactional system with Locking');
-//   });
+// Sometimes Flush Mongo + Redis (Don't use this if there's important Data stored in Redis)
+// clearUpTxDatabases();
 
-// sceleton(app_transactional_checker)
-//   .then(() => {
-//     console.log('finished running performance tests for the transactional system with Tx Checker');
-//   });
+
+// The right System must be running !!!
+// test-system-transactional Job + Event for all tx cases
+// test-system for the non_tx case
+runSpecs(app_tx_locking, testruns, 'tx_locking_sync', [])
+  .then(res => saveResults(res, 'tx_locking_sync'));
+
