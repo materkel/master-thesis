@@ -34,6 +34,7 @@ function beginTransaction(req, res, next) {
 
 function aquireLock(req, res, next) {
   const type = req.method !== 'GET' ? 'write' : 'read';
+  log.debug('LOCK TYPE', type);
   lockManager
     .lock({
       type,
